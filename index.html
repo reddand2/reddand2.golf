@@ -11,9 +11,9 @@
         .tab-content { display: none; min-height: 80vh; }
         .tab-content.active { display: block; }
         
-        /* Home Tab Special Background */
+        /* Home Tab Hub - Image Background */
         #tab-home {
-            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('hero.jpeg');
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.8)), url('hero.jpeg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -33,18 +33,20 @@
         .small-row { height: 35px !important; font-size: 11px; background: #f8fafc; color: #64748b; font-weight: bold; }
         .par-row { height: 45px !important; background: #f1f5f9; font-weight: 900; font-size: 15px; }
         .subtotal-col { background: #f1f5f9; font-weight: 800; min-width: 75px; font-size: 18px; }
-        .match-row { background: #ffffff; font-weight: 900; color: #000000 !important; font-size: 16px; border-top: 2px solid #e2e8f0; }
         
+        /* Match Rows - Dynamic Colors */
+        .match-row { background: #ffffff; font-weight: 900; font-size: 18px; border-top: 2px solid #e2e8f0; }
+        .text-red-lead { color: #ef4444 !important; }
+        .text-blue-lead { color: #3b82f6 !important; }
+        .text-as { color: #1e293b !important; }
+
         input { background: transparent; outline: none; width: 100%; height: 100%; text-align: center; font-weight: inherit; font-size: 20px; }
         .name-input { text-align: left; padding-left: 12px; font-weight: 800; font-size: 18px; }
         
         .nav-btn { font-size: 15px; letter-spacing: 0.025em; font-weight: 900; padding: 14px 12px; white-space: nowrap; border-bottom: 4px solid transparent; opacity: 0.6; color: white; }
         .active-nav { border-bottom-color: #34d399 !important; opacity: 1 !important; }
 
-        /* Wolf & Teams */
-        .wolf-cell { background-color: #fef3c7 !important; font-weight: 900 !important; }
-        .wolf-badge { position: absolute; bottom: 2px; right: 2px; font-size: 9px; padding: 1px 3px; border-radius: 3px; background: #d97706; color: white; font-weight: 900; cursor: pointer; z-index: 30; }
-        .team-dot { width: 40px; height: 40px; border-radius: 10px; cursor: pointer; border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; }
+        .team-dot { width: 44px; height: 44px; border-radius: 12px; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; }
         
         .bg-red { background-color: #ef4444 !important; color: white; }
         .bg-blue { background-color: #3b82f6 !important; color: white; }
@@ -61,38 +63,38 @@
 <body class="pb-20">
 
     <!-- DYNAMIC HEADER -->
-    <header id="main-header" class="relative w-full h-48 overflow-hidden bg-emerald-900 shadow-xl">
-        <img id="header-img" src="hero.jpeg" class="w-full h-full object-cover opacity-80" onerror="this.style.display='none'">
+    <header id="main-header" class="relative w-full h-48 overflow-hidden bg-emerald-900 shadow-xl" style="display:none;">
+        <img src="hero.jpeg" class="w-full h-full object-cover opacity-80" onerror="this.style.display='none'">
         <div class="absolute inset-0 hero-gradient flex items-end justify-center pb-8 text-center">
             <h1 id="header-title" class="text-white text-4xl font-black italic tracking-tighter uppercase px-6">Live Leaderboard</h1>
         </div>
     </header>
 
     <!-- NAVIGATION -->
-    <nav class="bg-emerald-900 text-white sticky top-0 z-50 shadow-xl overflow-x-auto">
+    <nav class="bg-emerald-900 text-white sticky top-0 z-50 shadow-xl overflow-x-auto no-scrollbar">
         <div class="flex px-2" id="nav-bar"></div>
     </nav>
 
     <div class="relative">
-        <!-- HOME TAB (Full Image Background) -->
+        <!-- HOME TAB -->
         <div id="tab-home" class="tab-content active p-4 space-y-6">
-            <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl mt-4">
-                <h2 class="text-[10px] font-black uppercase text-white/60 mb-6 tracking-widest text-center border-b border-white/10 pb-2">Tournament Roster</h2>
-                <div id="roster-setup" class="space-y-4"></div>
-                <button onclick="addPlayer()" class="w-full mt-6 py-3 bg-white/10 text-white font-black rounded-xl uppercase text-[10px] tracking-widest">+ Add Player</button>
+            <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl mt-8">
+                <h2 class="text-[10px] font-black uppercase text-white/50 mb-6 tracking-widest text-center border-b border-white/10 pb-2">Tournament Roster</h2>
+                <div id="roster-setup" class="space-y-5"></div>
+                <button onclick="addPlayer()" class="w-full mt-6 py-4 bg-white/5 text-white/70 font-black rounded-xl uppercase text-[10px] tracking-widest border border-white/10">+ Add Player</button>
             </div>
             
             <button onclick="addRound()" class="w-full py-6 bg-emerald-500 text-white font-black rounded-3xl uppercase tracking-widest shadow-2xl active:scale-95 transition-transform text-lg">Start Next Round</button>
-            <button onclick="resetData()" class="block mx-auto text-[10px] text-white/30 font-bold uppercase underline">Reset Tournament</button>
+            <button onclick="resetData()" class="block mx-auto text-[10px] text-white/30 font-bold uppercase underline">Reset Everything</button>
         </div>
 
         <!-- STANDINGS TAB -->
         <div id="tab-summary" class="tab-content pt-4 p-3">
-            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
                 <table class="w-full">
                     <thead>
                         <tr class="bg-slate-900 text-white text-[11px] uppercase italic font-black">
-                            <th class="p-5 text-left sticky-col border-none">Player</th>
+                            <th class="p-6 text-left sticky-col border-none">Player</th>
                             <th class="bg-emerald-700">Earnings</th>
                         </tr>
                     </thead>
@@ -109,17 +111,12 @@
         const pars = [4,4,5,3,4,5,3,4,4, 4,3,4,5,4,4,3,4,5];
         const yards = [342, 422, 541, 165, 371, 519, 125, 386, 404, 394, 157, 372, 500, 456, 410, 196, 330, 552];
 
-        // Self-Repair logic for blank screens
-        let rawData = localStorage.getItem('golfTripV5');
-        let state;
-        try {
-            state = JSON.parse(rawData);
-            if(!state || !state.players) throw new Error();
-        } catch(e) {
-            state = { players: [{ name: '', hdcp: 0, team: 'none' }], rounds: [] };
-        }
+        let state = JSON.parse(localStorage.getItem('golfTripV7')) || {
+            players: [{ name: '', hdcp: 0, team: 'none' }],
+            rounds: []
+        };
 
-        function save() { localStorage.setItem('golfTripV5', JSON.stringify(state)); }
+        function save() { localStorage.setItem('golfTripV7', JSON.stringify(state)); }
 
         function init() {
             renderNav();
@@ -144,7 +141,7 @@
                     <div onclick="cycleTeam(${i})" class="team-dot bg-${p.team}">${p.team === 'none' ? '?' : ''}</div>
                     <input type="text" class="text-left font-black w-full text-xl text-white placeholder-white/20" placeholder="Name" value="${p.name}" oninput="state.players[${i}].name=this.value;save();">
                     <div class="flex flex-col items-center">
-                        <span class="text-[8px] text-white/40 font-black uppercase">HCP</span>
+                        <span class="text-[8px] text-white/40 font-black uppercase tracking-tighter">HCP</span>
                         <input type="number" class="w-16 bg-white/10 border border-white/10 rounded-xl p-2 text-center font-bold text-white text-lg" value="${p.hdcp}" oninput="state.players[${i}].hdcp=parseInt(this.value)||0;save();">
                     </div>
                 </div>
@@ -175,7 +172,6 @@
             const nav = document.getElementById('nav-' + tabId);
             if(nav) nav.classList.add('active-nav');
 
-            // Header Logic
             const header = document.getElementById('main-header');
             const title = document.getElementById('header-title');
             if (tabId === 'home') {
@@ -190,9 +186,9 @@
             const container = document.getElementById('rounds-container');
             container.innerHTML = state.rounds.map(r => `
                 <div id="tab-r${r.id}" class="tab-content pt-4 space-y-4 p-3">
-                    <div class="bg-white p-5 rounded-2xl shadow border border-slate-200 grid grid-cols-2 gap-4 text-center">
+                    <div class="bg-white p-5 rounded-3xl shadow border border-slate-200 grid grid-cols-2 gap-4 text-center">
                         <div>
-                            <label class="text-[9px] uppercase font-black text-slate-400">Game Mode</label>
+                            <label class="text-[9px] uppercase font-black text-slate-400">Game Type</label>
                             <select onchange="updateRoundGame(${r.id}, this.value)" class="w-full p-2 bg-slate-50 border rounded-xl font-bold text-sm">
                                 <option value="nassau" ${r.game==='nassau'?'selected':''}>Nassau</option>
                                 <option value="stroke" ${r.game==='stroke'?'selected':''}>Stroke Play</option>
@@ -202,10 +198,10 @@
                         </div>
                         <div class="grid grid-cols-3 gap-1">
                             ${r.game==='nassau' ? `
-                                <div><span class="text-[8px]">F</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>
-                                <div><span class="text-[8px]">B</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[1]}" oninput="updateRoundBet(${r.id},1,this.value)"></div>
-                                <div><span class="text-[8px]">T</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[2]}" oninput="updateRoundBet(${r.id},2,this.value)"></div>
-                            ` : `<div class="col-span-3"><span class="text-[8px]">Bet / Point</span><input type="number" class="w-full p-2 border rounded font-bold" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>`}
+                                <div><span class="text-[8px] font-bold">F$</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>
+                                <div><span class="text-[8px] font-bold">B$</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[1]}" oninput="updateRoundBet(${r.id},1,this.value)"></div>
+                                <div><span class="text-[8px] font-bold">T$</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[2]}" oninput="updateRoundBet(${r.id},2,this.value)"></div>
+                            ` : `<div class="col-span-3"><span class="text-[8px] font-bold">Bet Per Pt</span><input type="number" class="w-full p-2 border rounded font-bold" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>`}
                         </div>
                     </div>
                     <div id="scorecard-${r.id}"></div>
@@ -219,7 +215,7 @@
             const container = document.getElementById('scorecard-' + rId);
             if(!container) return;
 
-            let html = `<div class="scorecard-wrapper shadow-xl rounded-2xl border border-slate-200 bg-white"><table>`;
+            let html = `<div class="scorecard-wrapper shadow-2xl rounded-3xl border border-slate-200 bg-white"><table>`;
             html += `<thead><tr class="header-row"><th class="sticky-col min-w-[130px]">HOLE</th>`;
             for(let h=1; h<=18; h++) { html += `<th>${h}</th>`; if(h===9) html += `<th class="subtotal-col">OUT</th>`; }
             html += `<th class="subtotal-col">IN</th><th class="subtotal-col bg-emerald-700">TOT</th></tr></thead><tbody>`;
@@ -239,11 +235,9 @@
                 for(let h=1; h<=18; h++) {
                     const score = r.scores[`h${h}_p${pIdx}`] || '';
                     if(h<=9) out += (score || 0); else in9 += (score || 0);
-                    const isWolf = r.wolves[h] === pIdx;
-                    html += `<td class="relative ${isWolf ? 'wolf-cell' : ''}">
-                        <input type="number" inputmode="numeric" class="${isWolf ? 'font-black' : ''}" value="${score}" oninput="state.rounds.find(x=>x.id===${rId}).scores['h${h}_p${pIdx}']=parseInt(this.value)||0;save();">
+                    html += `<td class="relative">
+                        <input type="number" inputmode="numeric" value="${score}" oninput="state.rounds.find(x=>x.id===${rId}).scores['h${h}_p${pIdx}']=parseInt(this.value)||0;save();updateLiveMatch(${rId});">
                         ${getStrokes(p.hdcp, h) > 0 ? `<span class="absolute top-0 right-1 text-[10px] text-red-500 font-black">${'*'.repeat(getStrokes(p.hdcp,h))}</span>` : ''}
-                        ${r.game === 'wolf' ? `<div onclick="setWolf(${rId}, ${h}, ${pIdx})" class="wolf-badge">W</div>` : ''}
                     </td>`;
                     if(h===9) html += `<td class="subtotal-col font-bold">${out || ''}</td>`;
                 }
@@ -251,34 +245,51 @@
             });
 
             if (r.game === 'nassau') {
-                const match = calculateMatchStatus(r);
-                const matchRow = (title, data) => {
-                    let row = `<tr class="match-row"><td class="sticky-col text-left px-3 uppercase text-xs">${title}</td>`;
-                    for(let h=1; h<=18; h++) { row += `<td>${data[h-1]}</td>`; if(h===9) row += `<td class="subtotal-col"></td>`; }
-                    row += `<td></td><td></td></tr>`; return row;
-                };
-                html += matchRow('Side', match.side);
-                html += matchRow('Overall', match.overall);
+                html += `<tr class="match-row" id="row-side-${rId}"><td class="sticky-col text-left px-3 uppercase text-xs">Side</td></tr>`;
+                html += `<tr class="match-row border-t-2" id="row-overall-${rId}"><td class="sticky-col text-left px-3 uppercase text-xs">Overall</td></tr>`;
             }
             html += `</tbody></table></div>`;
             container.innerHTML = html;
+            if(r.game === 'nassau') updateLiveMatch(rId);
         }
 
-        function calculateMatchStatus(r) {
-            let side = Array(18).fill('-'), overall = Array(18).fill('-');
+        function updateLiveMatch(rId) {
+            const r = state.rounds.find(x => x.id === rId);
+            if (!r || r.game !== 'nassau') return;
+            
             let rF = 0, bF = 0, rB = 0, bB = 0, rT = 0, bT = 0;
+            const sideRow = document.getElementById(`row-side-${rId}`);
+            const overRow = document.getElementById(`row-overall-${rId}`);
+            if(!sideRow || !overRow) return;
+
+            let sideHtml = `<td class="sticky-col text-left px-3 uppercase text-xs font-black">Side</td>`;
+            let overHtml = `<td class="sticky-col text-left px-3 uppercase text-xs font-black">Overall</td>`;
+
             for(let h=1; h<=18; h++) {
                 const net = (c) => Math.min(...state.players.map((p,i)=>(p.team===c && r.scores[`h${h}_p${i}`])?r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h):999));
                 let red = net('red'), blue = net('blue');
-                if(red<900 && blue<900) {
+                
+                if(red < 900 && blue < 900) {
                     if(h<=9) { rF += red; bF += blue; } else { rB += red; bB += blue; }
                     rT += red; bT += blue;
                 }
-                const f = (rv, bv) => rv===bv ? 'AS' : (rv<bv ? `${bv-rv} ↑` : `${rv-bv} ↑`);
-                side[h-1] = h<=9 ? f(rF, bF) : f(rB, bB);
-                overall[h-1] = f(rT, bT);
+
+                const getFmt = (rv, bv) => {
+                    if (rv >= 900 || bv >= 900 || (rv === 0 && bv === 0)) return {v:'-',c:''};
+                    if (rv === bv) return {v:'AS',c:'text-as'};
+                    if (rv < bv) return {v: (bv-rv) + ' ↑', c:'text-red-lead'};
+                    return {v: (rv-bv) + ' ↑', c:'text-blue-lead'};
+                };
+
+                const s = h<=9 ? getFmt(rF, bF) : getFmt(rB, bB);
+                const o = getFmt(rT, bT);
+
+                sideHtml += `<td class="${s.c}">${s.v}</td>`;
+                overHtml += `<td class="${o.c}">${o.v}</td>`;
+                if(h===9) { sideHtml += `<td class="subtotal-col"></td>`; overHtml += `<td class="subtotal-col"></td>`; }
             }
-            return { side, overall };
+            sideRow.innerHTML = sideHtml + `<td></td><td></td>`;
+            overRow.innerHTML = overHtml + `<td></td><td></td>`;
         }
 
         function renderStandings() {
@@ -291,23 +302,23 @@
                         let nr=net('red'), nb=net('blue');
                         if(nr<900 && nb<900) { if(h<=9){rF+=nr;bF+=nb;}else{rB+=nr;bB+=nb;} }
                     }
-                    let rw=0; if(rF<bF)rw+=r.bets[0]; else if(bF<rF)rw-=r.bets[0];
+                    let rw=0; 
+                    if(rF<bF)rw+=r.bets[0]; else if(bF<rF)rw-=r.bets[0];
                     if(rB<bB)rw+=r.bets[1]; else if(bB<rB)rw-=r.bets[1];
                     if((rF+rB)<(bF+bB))rw+=r.bets[2]; else if((bF+bB)<(rF+rB))rw-=r.bets[2];
                     state.players.forEach((p,i)=>{if(p.team==='red')cash[i]+=rw; if(p.team==='blue')cash[i]-=rw;});
                 }
             });
             document.getElementById('standings-body').innerHTML = state.players.map((p,i)=>`
-                <tr class="border-b"><td class="p-6 text-left font-black text-slate-700 text-lg team-border-${p.team}">${p.name||`Player ${i+1}`}</td>
-                <td class="font-black text-2xl ${cash[i]>=0?'text-emerald-600':'text-red-500'}">${cash[i]!==0?(cash[i]>0?'+$'+cash[i]:'-$'+Math.abs(cash[i])):'-'}</td></tr>
+                <tr class="border-b"><td class="p-8 text-left font-black text-slate-700 text-xl team-border-${p.team}">${p.name||`Player ${i+1}`}</td>
+                <td class="font-black text-3xl ${cash[i]>=0?'text-emerald-600':'text-red-500'}">${cash[i]!==0?(cash[i]>0?'+$'+cash[i]:'-$'+Math.abs(cash[i])):'-'}</td></tr>
             `).join('');
         }
 
         function updateRoundGame(id, val) { state.rounds.find(x=>x.id===id).game=val; save(); renderAllRounds(); showTab('r'+id); }
         function updateRoundBet(id, idx, val) { state.rounds.find(x=>x.id===id).bets[idx]=parseInt(val)||0; save(); renderStandings(); }
-        function setWolf(rId, h, pI) { const r=state.rounds.find(x=>x.id===rId); r.wolves[h]=(r.wolves[h]===pI)?undefined:pI; save(); renderScorecard(rId); }
         function getStrokes(hdcp, hIdx) { let s=0; let t=hdcp; while(t>0){if(t>=holeIndices[hIdx-1])s++; t-=18;} return s; }
-        function resetData() { if(confirm("Clear Trip?")) { localStorage.removeItem('golfTripV5'); location.reload(); } }
+        function resetData() { if(confirm("Wipe everything?")) { localStorage.removeItem('golfTripV7'); location.reload(); } }
 
         init();
     </script>
