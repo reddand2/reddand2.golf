@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dacotah Ridge Leaderboard</title>
+    <title>Golf Trip Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -15,32 +15,24 @@
         .scorecard-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .sticky-col { position: sticky; left: 0; background: white; z-index: 20; border-right: 2px solid #e2e8f0; }
         table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #e2e8f0; min-width: 65px; height: 65px; text-align: center; vertical-align: middle; }
+        th, td { border: 1px solid #e2e8f0; min-width: 65px; height: 60px; text-align: center; vertical-align: middle; }
         
         .header-row { background: #1e293b; color: white; font-size: 13px; font-weight: 900; }
-        .small-row { height: 35px !important; font-size: 11px; background: #f8fafc; color: #64748b; font-weight: bold; }
+        .small-row { height: 35px !important; font-size: 10px; background: #f8fafc; color: #64748b; font-weight: bold; }
         .par-row { height: 45px !important; background: #f1f5f9; font-weight: 900; font-size: 14px; }
         .subtotal-col { background: #f1f5f9; font-weight: 800; min-width: 75px; font-size: 18px; }
-        .match-row { background: #ffffff; font-weight: 900; color: #000000; font-size: 16px; border-top: 2px solid #e2e8f0; }
         
-        input { background: transparent; outline: none; width: 100%; height: 100%; text-align: center; font-weight: inherit; font-size: 22px; }
-        .name-input { text-align: left; padding-left: 12px; font-weight: 800; font-size: 18px; }
-        .nav-btn { font-size: 14px; letter-spacing: 0.025em; font-weight: 900; padding: 12px 10px; white-space: nowrap; }
-        .active-nav { border-bottom: 4px solid #34d399 !important; opacity: 1 !important; }
+        input { background: transparent; outline: none; width: 100%; height: 100%; text-align: center; font-weight: inherit; font-size: 20px; }
+        .name-input { text-align: left; padding-left: 12px; font-weight: 800; font-size: 17px; }
+        .nav-btn { font-size: 13px; font-weight: 900; padding: 12px 8px; white-space: nowrap; border-bottom: 4px solid transparent; }
+        .active-nav { border-bottom-color: #34d399 !important; opacity: 1 !important; }
 
-        /* Wolf Specific Styles */
         .wolf-cell { background-color: #fef3c7 !important; font-weight: 900 !important; }
-        .wolf-badge { 
-            position: absolute; bottom: 2px; right: 2px; 
-            font-size: 9px; padding: 1px 3px; border-radius: 3px;
-            background: #d97706; color: white; font-weight: 900;
-            cursor: pointer; z-index: 30;
-        }
+        .wolf-badge { position: absolute; bottom: 2px; right: 2px; font-size: 9px; padding: 1px 3px; border-radius: 3px; background: #d97706; color: white; font-weight: 900; cursor: pointer; z-index: 30; }
         .wolf-badge.inactive { background: #e2e8f0; color: #94a3b8; }
 
-        /* Team Colors */
-        .team-select-cell { position: relative; padding: 0 !important; }
-        .team-select-cell select { appearance: none; width: 100%; height: 100%; border: none; background: transparent; text-indent: -9999px; cursor: pointer; }
+        /* Team Colors on Home Page */
+        .team-dot { width: 24px; height: 24px; border-radius: 6px; cursor: pointer; border: 2px solid #e2e8f0; }
         .bg-red { background-color: #ef4444 !important; }
         .bg-blue { background-color: #3b82f6 !important; }
         .bg-white { background-color: #ffffff !important; }
@@ -49,32 +41,45 @@
         .team-border-blue { border-left: 14px solid #3b82f6 !important; }
         .team-border-white { border-left: 14px solid #e2e8f0 !important; }
         .team-border-grey { border-left: 14px solid #64748b !important; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="pb-20 text-slate-900">
 
-    <div id="hero-header" class="relative w-full h-48 overflow-hidden bg-emerald-900">
+    <div id="hero-header" class="relative w-full h-44 overflow-hidden bg-emerald-900">
         <img src="hero.jpeg" class="w-full h-full object-cover opacity-80" onerror="this.src='https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&q=80&w=1000'">
-        <div class="absolute inset-0 hero-gradient flex items-end justify-center pb-8">
-            <h1 class="text-white text-3xl font-black italic tracking-tighter uppercase">Live Leaderboard</h1>
+        <div class="absolute inset-0 hero-gradient flex items-end justify-center pb-6">
+            <h1 class="text-white text-2xl font-black italic tracking-tighter uppercase">Golf Tournament Pro</h1>
         </div>
     </div>
 
-    <nav class="bg-emerald-900 text-white sticky top-0 z-50 shadow-xl overflow-x-auto no-scrollbar">
+    <nav class="bg-emerald-900 text-white sticky top-0 z-50 shadow-xl overflow-x-auto">
         <div class="flex px-2" id="nav-bar"></div>
     </nav>
 
     <div class="p-3">
         <!-- HOME TAB -->
-        <div id="tab-home" class="tab-content active pt-4 space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200">
-                <h2 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest text-center">Tournament Roster</h2>
-                <div id="roster-setup" class="space-y-4"></div>
-                <button onclick="addPlayer()" class="w-full mt-6 py-3 bg-slate-100 text-slate-600 font-black rounded-xl uppercase text-[10px] tracking-widest">+ Add Player</button>
+        <div id="tab-home" class="tab-content active pt-4 space-y-4">
+            <!-- COURSE SELECTOR -->
+            <div class="bg-white p-5 rounded-2xl shadow border border-slate-200">
+                <h2 class="text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest">Course Information</h2>
+                <select id="course-selector" onchange="changeCourse(this.value)" class="w-full p-3 bg-slate-50 border rounded-xl font-bold text-sm">
+                    <option value="dacotah">Dacotah Ridge Golf Club</option>
+                    <option value="custom">-- Custom Course (Manual Entry) --</option>
+                </select>
+                <div id="custom-course-area" class="mt-4 hidden text-[10px] text-center font-bold text-slate-400">
+                    Edit Par/Yards/HCP directly in any Round scorecard.
+                </div>
             </div>
+
+            <!-- ROSTER SETUP -->
+            <div class="bg-white p-5 rounded-2xl shadow border border-slate-200">
+                <h2 class="text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest text-center">Roster & Teams</h2>
+                <div id="roster-setup" class="space-y-4"></div>
+                <button onclick="addPlayer()" class="w-full mt-4 py-3 bg-slate-100 text-slate-600 font-black rounded-xl uppercase text-[10px] tracking-widest">+ Add Player</button>
+            </div>
+
             <button onclick="addRound()" class="w-full py-5 bg-emerald-600 text-white font-black rounded-2xl uppercase tracking-widest shadow-lg active:scale-95 transition-transform">+ Start Next Round</button>
-            <button onclick="resetData()" class="block mx-auto text-[10px] text-red-300 font-bold uppercase underline opacity-40">Reset Entire Trip</button>
+            <button onclick="resetData()" class="block mx-auto text-[10px] text-red-300 font-bold uppercase underline opacity-30">Full Reset</button>
         </div>
 
         <!-- STANDINGS TAB -->
@@ -84,7 +89,7 @@
                     <thead>
                         <tr class="bg-slate-900 text-white text-[11px] uppercase italic">
                             <th class="p-5 text-left">Player</th>
-                            <th class="bg-emerald-700">Total Winnings</th>
+                            <th class="bg-emerald-700">Earnings</th>
                         </tr>
                     </thead>
                     <tbody id="standings-body"></tbody>
@@ -92,34 +97,53 @@
             </div>
         </div>
 
-        <!-- ROUNDS CONTAINER -->
         <div id="rounds-container"></div>
     </div>
 
     <script>
-        const holeIndices = [15, 1, 3, 13, 9, 7, 17, 11, 5, 12, 14, 4, 8, 2, 10, 16, 18, 6];
-        const pars = [4,4,5,3,4,5,3,4,4, 4,3,4,5,4,4,3,4,5];
-        const yards = [342, 422, 541, 165, 371, 519, 125, 386, 404, 394, 157, 372, 500, 456, 410, 196, 330, 552];
-
-        let state = JSON.parse(localStorage.getItem('golfTournamentData_v2')) || {
-            players: [{ name: '', hdcp: 0 }],
-            rounds: []
+        const courses = {
+            dacotah: {
+                name: "Dacotah Ridge",
+                yards: [342, 422, 541, 165, 371, 519, 125, 386, 404, 394, 157, 372, 500, 456, 410, 196, 330, 552],
+                pars: [4,4,5,3,4,5,3,4,4, 4,3,4,5,4,4,3,4,5],
+                indices: [15, 1, 3, 13, 9, 7, 17, 11, 5, 12, 14, 4, 8, 2, 10, 16, 18, 6]
+            },
+            custom: {
+                name: "Custom Course",
+                yards: Array(18).fill(0),
+                pars: Array(18).fill(4),
+                indices: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]
+            }
         };
 
-        function save() { localStorage.setItem('golfTournamentData_v2', JSON.stringify(state)); }
+        let state = JSON.parse(localStorage.getItem('golfTripV3')) || {
+            players: [{ name: '', hdcp: 0, team: 'white' }],
+            rounds: [],
+            course: courses.dacotah
+        };
+
+        function save() { localStorage.setItem('golfTripV3', JSON.stringify(state)); }
 
         function init() {
             renderNav();
             renderRosterSetup();
             renderStandings();
             renderAllRounds();
+            document.getElementById('course-selector').value = state.course.name === "Dacotah Ridge" ? "dacotah" : "custom";
+        }
+
+        function changeCourse(val) {
+            state.course = courses[val];
+            save();
+            renderAllRounds();
+            document.getElementById('custom-course-area').style.display = (val === 'custom') ? 'block' : 'none';
         }
 
         function renderNav() {
-            let html = `<button id="nav-home" onclick="showTab('home')" class="nav-btn">HOME</button>`;
-            html += `<button id="nav-summary" onclick="showTab('summary')" class="nav-btn">STANDINGS</button>`;
+            let html = `<button id="nav-home" onclick="showTab('home')" class="nav-btn opacity-60">HOME</button>`;
+            html += `<button id="nav-summary" onclick="showTab('summary')" class="nav-btn opacity-60">STANDINGS</button>`;
             state.rounds.forEach(r => {
-                html += `<button id="nav-r${r.id}" onclick="showTab('r${r.id}')" class="nav-btn">ROUND ${r.id}</button>`;
+                html += `<button id="nav-r${r.id}" onclick="showTab('r${r.id}')" class="nav-btn opacity-60">ROUND ${r.id}</button>`;
             });
             document.getElementById('nav-bar').innerHTML = html;
         }
@@ -127,7 +151,13 @@
         function renderRosterSetup() {
             document.getElementById('roster-setup').innerHTML = state.players.map((p, i) => `
                 <div class="flex items-center space-x-3 border-b pb-3">
-                    <input type="text" class="text-left font-black w-full text-lg" placeholder="Player Name" value="${p.name}" oninput="state.players[${i}].name=this.value;save();">
+                    <select onchange="state.players[${i}].team=this.value;save();renderRosterSetup();" class="team-dot bg-${p.team} outline-none border-none">
+                        <option value="white" ${p.team==='white'?'selected':''}>W</option>
+                        <option value="red" ${p.team==='red'?'selected':''}>R</option>
+                        <option value="blue" ${p.team==='blue'?'selected':''}>B</option>
+                        <option value="grey" ${p.team==='grey'?'selected':''}>G</option>
+                    </select>
+                    <input type="text" class="text-left font-bold w-full text-lg" placeholder="Player Name" value="${p.name}" oninput="state.players[${i}].name=this.value;save();">
                     <div class="flex flex-col items-center">
                         <span class="text-[8px] text-slate-400 font-black uppercase">HCP</span>
                         <input type="number" class="w-14 bg-slate-50 border rounded-lg p-1 text-center font-bold" value="${p.hdcp}" oninput="state.players[${i}].hdcp=parseInt(this.value)||0;save();">
@@ -136,11 +166,11 @@
             `).join('');
         }
 
-        function addPlayer() { state.players.push({name:'', hdcp:0}); save(); renderRosterSetup(); }
+        function addPlayer() { state.players.push({name:'', hdcp:0, team:'white'}); save(); renderRosterSetup(); }
 
         function addRound() {
             const id = state.rounds.length + 1;
-            state.rounds.push({ id, game: 'nassau', bets: [20, 20, 50], scores: {}, playerTeams: {}, wolves: {} });
+            state.rounds.push({ id, game: 'nassau', bets: [0, 0, 0], scores: {}, wolves: {} });
             save(); init(); showTab('r' + id);
         }
 
@@ -153,20 +183,13 @@
             document.getElementById('hero-header').style.display = (tabId === 'home') ? 'block' : 'none';
         }
 
-        function setWolf(rId, hole, pIdx) {
-            const r = state.rounds.find(x => x.id === rId);
-            if (r.wolves[hole] === pIdx) delete r.wolves[hole];
-            else r.wolves[hole] = pIdx;
-            save(); renderScorecard(rId); renderStandings();
-        }
-
         function renderAllRounds() {
             const container = document.getElementById('rounds-container');
             container.innerHTML = state.rounds.map(r => `
                 <div id="tab-r${r.id}" class="tab-content pt-4 space-y-4">
-                    <div class="bg-white p-5 rounded-2xl shadow border border-slate-200 grid grid-cols-2 gap-4">
+                    <div class="bg-white p-5 rounded-2xl shadow border border-slate-200 grid grid-cols-2 gap-4 text-center">
                         <div>
-                            <label class="text-[10px] uppercase font-black text-slate-400">Game Type</label>
+                            <label class="text-[9px] uppercase font-black text-slate-400">Game Mode</label>
                             <select onchange="updateRoundGame(${r.id}, this.value)" class="w-full p-2 bg-slate-50 border rounded-xl font-bold text-sm mt-1">
                                 <option value="nassau" ${r.game==='nassau'?'selected':''}>Nassau</option>
                                 <option value="stroke" ${r.game==='stroke'?'selected':''}>Stroke Play</option>
@@ -174,12 +197,12 @@
                                 <option value="wolf" ${r.game==='wolf'?'selected':''}>Wolf</option>
                             </select>
                         </div>
-                        <div class="grid grid-cols-3 gap-1 items-end">
+                        <div class="grid grid-cols-3 gap-1">
                             ${r.game==='nassau' ? `
-                                <div><span class="text-[8px] uppercase text-slate-400">F</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>
-                                <div><span class="text-[8px] uppercase text-slate-400">B</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[1]}" oninput="updateRoundBet(${r.id},1,this.value)"></div>
-                                <div><span class="text-[8px] uppercase text-slate-400">T</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[2]}" oninput="updateRoundBet(${r.id},2,this.value)"></div>
-                            ` : `<div class="col-span-3"><span class="text-[8px] uppercase text-slate-400">Points/Hole Bet</span><input type="number" class="w-full p-2 border rounded font-bold" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>`}
+                                <div><span class="text-[8px] text-slate-400">F</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>
+                                <div><span class="text-[8px] text-slate-400">B</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[1]}" oninput="updateRoundBet(${r.id},1,this.value)"></div>
+                                <div><span class="text-[8px] text-slate-400">T</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[2]}" oninput="updateRoundBet(${r.id},2,this.value)"></div>
+                            ` : `<div class="col-span-3"><span class="text-[8px] text-slate-400">Bet per Point</span><input type="number" class="w-full p-2 border rounded font-bold" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>`}
                         </div>
                     </div>
                     <div id="scorecard-${r.id}"></div>
@@ -187,9 +210,6 @@
             `).join('');
             state.rounds.forEach(r => renderScorecard(r.id));
         }
-
-        function updateRoundGame(id, val) { const r = state.rounds.find(x => x.id === id); r.game = val; save(); init(); showTab('r'+id); }
-        function updateRoundBet(id, idx, val) { const r = state.rounds.find(x => x.id === id); r.bets[idx] = parseInt(val) || 0; save(); renderStandings(); }
 
         function renderScorecard(rId) {
             const r = state.rounds.find(x => x.id === rId);
@@ -200,28 +220,23 @@
             for(let h=1; h<=18; h++) { html += `<th>${h}</th>`; if(h===9) html += `<th class="subtotal-col">OUT</th>`; }
             html += `<th class="subtotal-col">IN</th><th class="subtotal-col bg-emerald-700">TOT</th></tr></thead><tbody>`;
 
-            const smallRow = (label, data, subt) => {
+            // Small info rows - Now editable if custom!
+            const renderDataRow = (label, dataKey, subArr) => {
                 let row = `<tr class="small-row"><td class="sticky-col text-left px-3 uppercase">${label}</td>`;
-                for(let h=1; h<=18; h++) { row += `<td>${data[h-1]}</td>`; if(h===9) row += `<td class="subtotal-col">${subt[0]}</td>`; }
-                row += `<td class="subtotal-col">${subt[1]}</td><td class="subtotal-col">${subt[2]}</td></tr>`;
+                for(let h=1; h<=18; h++) { 
+                    row += `<td><input type="number" class="text-[10px]" value="${state.course[dataKey][h-1]}" oninput="state.course.${dataKey}[${h-1}]=parseInt(this.value)||0;save();"></td>`;
+                    if(h===9) row += `<td class="subtotal-col">${subArr[0]}</td>`; 
+                }
+                row += `<td class="subtotal-col">${subArr[1]}</td><td class="subtotal-col">${subArr[2]}</td></tr>`;
                 return row;
             }
-            html += smallRow('Yards', yards, [3275, 3367, 6642]);
-            html += smallRow('HCP Index', holeIndices, ['', '', '']);
-            html += smallRow('Par', pars, [36, 36, 72]);
+            html += renderDataRow('Yards', 'yards', [state.course.yards.slice(0,9).reduce((a,b)=>a+b,0), state.course.yards.slice(9,18).reduce((a,b)=>a+b,0), state.course.yards.reduce((a,b)=>a+b,0)]);
+            html += renderDataRow('HCP Index', 'indices', ['', '', '']);
+            html += renderDataRow('Par', 'pars', [state.course.pars.slice(0,9).reduce((a,b)=>a+b,0), state.course.pars.slice(9,18).reduce((a,b)=>a+b,0), state.course.pars.reduce((a,b)=>a+b,0)]);
 
             state.players.forEach((p, pIdx) => {
                 let out = 0, in9 = 0;
-                const rTeam = r.playerTeams[pIdx] || 'none';
-                html += `<tr><td class="sticky-col team-select-cell bg-${rTeam} team-border-${rTeam}">
-                    <select onchange="updatePlayerRoundTeam(${rId}, ${pIdx}, this.value)" class="w-full text-xs font-black h-full p-2 outline-none">
-                        <option value="none" ${rTeam==='none'?'selected':''}>${p.name || '...'}</option>
-                        <option value="red" ${rTeam==='red'?'selected':''}>RED - ${p.name}</option>
-                        <option value="blue" ${rTeam==='blue'?'selected':''}>BLUE - ${p.name}</option>
-                        <option value="white" ${rTeam==='white'?'selected':''}>W - ${p.name}</option>
-                        <option value="grey" ${rTeam==='grey'?'selected':''}>G - ${p.name}</option>
-                    </select>
-                </td>`;
+                html += `<tr><td class="sticky-col text-left px-3 font-black text-slate-700 team-border-${p.team}">${p.name || '...'}</td>`;
                 for(let h=1; h<=18; h++) {
                     const score = r.scores[`h${h}_p${pIdx}`] || '';
                     const isWolf = r.wolves[h] === pIdx;
@@ -229,7 +244,7 @@
                     const str = getStrokes(p.hdcp, h);
                     html += `<td class="relative ${isWolf ? 'wolf-cell' : ''}">
                         <input type="number" inputmode="numeric" class="${isWolf ? 'font-black' : ''}" value="${score}" oninput="state.rounds.find(x=>x.id===${rId}).scores['h${h}_p${pIdx}']=parseInt(this.value)||0;save();">
-                        ${str > 0 ? `<span class="absolute top-0 right-1 text-[10px] text-red-500 font-black">${'*'.repeat(str)}</span>` : ''}
+                        ${str > 0 ? `<span class="absolute top-0 right-1 text-[9px] text-red-500 font-black">${'*'.repeat(str)}</span>` : ''}
                         ${r.game === 'wolf' ? `<div onclick="setWolf(${rId}, ${h}, ${pIdx})" class="wolf-badge ${isWolf ? '' : 'inactive'}">W</div>` : ''}
                     </td>`;
                     if(h===9) html += `<td class="subtotal-col font-bold">${out || ''}</td>`;
@@ -237,34 +252,30 @@
                 html += `<td class="subtotal-col font-bold">${in9 || ''}</td><td class="subtotal-col bg-slate-50 font-black text-xl">${(out+in9) || ''}</td></tr>`;
             });
 
-            // Match Logic Rows
             if (r.game === 'nassau') {
                 const match = calculateMatchStatus(r);
-                html += `<tr class="match-row"><td class="sticky-col text-left px-3 uppercase">Side</td>`;
-                for(let h=1; h<=18; h++) { html += `<td>${match.side[h-1]}</td>`; if(h===9) html += `<td class="subtotal-col"></td>`; }
-                html += `<td></td><td></td></tr>`;
-                html += `<tr class="match-row border-t-2"><td class="sticky-col text-left px-3 uppercase">Overall</td>`;
-                for(let h=1; h<=18; h++) { html += `<td>${match.overall[h-1]}</td>`; if(h===9) html += `<td class="subtotal-col"></td>`; }
-                html += `<td></td><td></td></tr>`;
+                const renderMatchRow = (title, data) => {
+                    let row = `<tr class="match-row"><td class="sticky-col text-left px-3 uppercase text-[12px]">${title}</td>`;
+                    for(let h=1; h<=18; h++) { row += `<td>${data[h-1]}</td>`; if(h===9) row += `<td class="subtotal-col"></td>`; }
+                    row += `<td></td><td></td></tr>`;
+                    return row;
+                };
+                html += renderMatchRow('Side', match.side);
+                html += renderMatchRow('Overall', match.overall);
             }
 
-            html += `</tbody></table></div><p class="p-4 text-[10px] text-center text-slate-400 uppercase font-black italic tracking-widest leading-loose">↑ Arrow indicates lead for Red vs Blue match.<br>Tap "W" in Wolf mode to designate the Wolf for that hole.</p>`;
+            html += `</tbody></table></div>`;
             container.innerHTML = html;
         }
 
-        function updatePlayerRoundTeam(rId, pIdx, team) {
-            const r = state.rounds.find(x => x.id === rId);
-            r.playerTeams[pIdx] = team;
-            save(); renderScorecard(rId); renderStandings();
-        }
+        // ... [Include calculateMatchStatus, calculateStandings, setWolf, updateRoundGame, updateRoundBet from previous versions] ...
 
         function calculateMatchStatus(r) {
             let side = Array(18).fill('-'), overall = Array(18).fill('-');
             let rF = 0, bF = 0, rB = 0, bB = 0, rT = 0, bT = 0;
-            const teams = r.playerTeams || {};
             for(let h=1; h<=18; h++) {
                 const getNet = (c) => {
-                    let s = state.players.map((p, i) => (teams[i] === c && r.scores[`h${h}_p${i}`]) ? r.scores[`h${h}_p${i}`] - getStrokes(p.hdcp, h) : 999);
+                    let s = state.players.map((p, i) => (p.team === c && r.scores[`h${h}_p${i}`]) ? r.scores[`h${h}_p${i}`] - getStrokes(p.hdcp, h) : 999);
                     let m = Math.min(...s); return m === 999 ? null : m;
                 };
                 let red = getNet('red'), blue = getNet('blue');
@@ -282,14 +293,12 @@
         function renderStandings() {
             let cash = Array(state.players.length).fill(0);
             state.rounds.forEach(r => {
-                const teams = r.playerTeams || {};
                 const bet = r.bets[0];
-
                 if(r.game === 'nassau') {
                     let rF = 0, bF = 0, rB = 0, bB = 0;
                     for(let h=1; h<=18; h++) {
                         const getNet = (c) => {
-                            let s = state.players.map((p,i) => (teams[i]===c && r.scores[`h${h}_p${i}`]) ? r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h) : 999);
+                            let s = state.players.map((p,i) => (p.team===c && r.scores[`h${h}_p${i}`]) ? r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h) : 999);
                             return Math.min(...s);
                         };
                         let nR = getNet('red'), nB = getNet('blue');
@@ -300,8 +309,7 @@
                     if(rF < bF) rWin += r.bets[0]; else if(bF < rF) rWin -= r.bets[0];
                     if(rB < bB) rWin += r.bets[1]; else if(bB < rB) rWin -= r.bets[1];
                     if((rF+rB) < (bF+bB)) rWin += r.bets[2]; else if((bF+bB) < (rF+rB)) rWin -= r.bets[2];
-                    state.players.forEach((p, i) => { if(teams[i] === 'red') cash[i] += rWin; if(teams[i] === 'blue') cash[i] -= rWin; });
-
+                    state.players.forEach((p, i) => { if(p.team === 'red') cash[i] += rWin; if(p.team === 'blue') cash[i] -= rWin; });
                 } else if(r.game === 'ninepoint') {
                     for(let h=1; h<=18; h++) {
                         let scores = state.players.map((p, i) => {
@@ -314,54 +322,39 @@
                         let pts = (s[0]===s[1] && s[1]===s[2]) ? [3,3,3] : (s[0]===s[1] ? [4,4,1] : (s[1]===s[2] ? [5,2,2] : [5,3,1]));
                         scores.forEach((obj, idx) => cash[obj.id] += pts[idx] * bet);
                     }
-                } else if(r.game === 'wolf') {
-                    for(let h=1; h<=18; h++) {
-                        const wolfIdx = r.wolves[h];
-                        if (wolfIdx === undefined) continue;
-                        const wolfTeam = [wolfIdx];
-                        const others = [];
-                        state.players.forEach((p, i) => {
-                            if(i === wolfIdx) return;
-                            if(teams[i] === teams[wolfIdx]) wolfTeam.push(i);
-                            else others.push(i);
-                        });
-                        const getBestNet = (ids) => {
-                            let scs = ids.map(id => r.scores[`h${h}_p${id}`] ? r.scores[`h${h}_p${id}`] - getStrokes(state.players[id].hdcp, h) : 999);
-                            return Math.min(...scs);
-                        };
-                        const bWolf = getBestNet(wolfTeam), bOthers = getBestNet(others);
-                        if(bWolf === 999 || bOthers === 999) continue;
-                        const lone = wolfTeam.length === 1;
-                        if(bWolf < bOthers) {
-                            const win = lone ? 4 : 1;
-                            wolfTeam.forEach(id => cash[id] += win * bet);
-                            others.forEach(id => cash[id] -= win * bet);
-                        } else if(bOthers < bWolf) {
-                            const loss = lone ? 1 : 1;
-                            wolfTeam.forEach(id => cash[id] -= (lone ? 3 : 1) * bet);
-                            others.forEach(id => cash[id] += loss * bet);
-                        }
-                    }
                 }
             });
-
             document.getElementById('standings-body').innerHTML = state.players.map((p, i) => `
-                <tr class="border-b">
-                    <td class="p-5 text-left font-black text-slate-700 text-lg">${p.name || `Player ${i+1}`}</td>
-                    <td class="font-black text-2xl ${cash[i] >= 0 ? 'text-emerald-600' : 'text-red-500'}">
-                        ${cash[i] !== 0 ? (cash[i] > 0 ? '+$'+cash[i] : '-$'+Math.abs(cash[i])) : '-'}
-                    </td>
-                </tr>
+                <tr class="border-b"><td class="p-5 text-left font-black text-slate-700 text-lg team-border-${p.team}">${p.name || `Player ${i+1}`}</td>
+                <td class="font-black text-2xl ${cash[i] >= 0 ? 'text-emerald-600' : 'text-red-500'}">${cash[i] !== 0 ? (cash[i]>0?'+$'+cash[i]:'-$'+Math.abs(cash[i])) : '-'}</td></tr>
             `).join('');
+        }
+
+        function setWolf(rId, hole, pIdx) {
+            const r = state.rounds.find(x => x.id === rId);
+            r.wolves[hole] = (r.wolves[hole] === pIdx) ? undefined : pIdx;
+            save(); renderScorecard(rId);
+        }
+
+        function updateRoundBet(id, idx, val) {
+            const r = state.rounds.find(x => x.id === id);
+            r.bets[idx] = parseInt(val) || 0;
+            save(); renderStandings();
+        }
+
+        function updateRoundGame(id, val) {
+            const r = state.rounds.find(x => x.id === id);
+            r.game = val;
+            save(); renderAllRounds();
         }
 
         function getStrokes(hdcp, hIdx) {
             let s = 0; let temp = hdcp;
-            while (temp > 0) { if (temp >= holeIndices[hIdx-1]) s++; temp -= 18; }
+            while (temp > 0) { if (temp >= state.course.indices[hIdx-1]) s++; temp -= 18; }
             return s;
         }
 
-        function resetData() { if(confirm("Clear Trip?")) { localStorage.removeItem('golfTournament'); location.reload(); } }
+        function resetData() { localStorage.removeItem('golfTripV3'); location.reload(); }
 
         init();
         showTab('home');
