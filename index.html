@@ -15,22 +15,25 @@
         .scorecard-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .sticky-col { position: sticky; left: 0; background: white; z-index: 20; border-right: 2px solid #e2e8f0; }
         table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #e2e8f0; min-width: 50px; height: 55px; text-align: center; vertical-align: middle; }
-        .header-row { background: #1e293b; color: white; font-size: 12px; font-weight: 900; }
+        th, td { border: 1px solid #e2e8f0; min-width: 50px; height: 60px; text-align: center; vertical-align: middle; }
+        .header-row { background: #1e293b; color: white; font-size: 13px; font-weight: 900; }
         .info-row { background: #f8fafc; color: #64748b; font-size: 11px; font-weight: bold; }
-        .subtotal-col { background: #f1f5f9; font-weight: 800; min-width: 60px; font-size: 14px; }
+        .subtotal-col { background: #f1f5f9; font-weight: 800; min-width: 60px; font-size: 16px; }
         input { background: transparent; outline: none; width: 100%; height: 100%; text-align: center; font-weight: inherit; }
-        .name-input { text-align: left; padding-left: 12px; font-weight: 800; font-size: 16px; }
-        /* Placeholder styling */
+        .name-input { text-align: left; padding-left: 12px; font-weight: 800; font-size: 17px; }
         ::placeholder { color: #cbd5e1; font-weight: 400; font-style: italic; }
+        
+        /* Navigation button size bump */
+        .nav-btn { font-size: 14px; letter-spacing: 0.025em; font-weight: 900; }
     </style>
 </head>
 <body class="pb-20 text-slate-900">
 
     <!-- HERO SECTION -->
-    <div id="hero-header" class="relative w-full h-52 overflow-hidden bg-emerald-900">
-        <img src="hero.jpg" class="w-full h-full object-cover opacity-70" onerror="this.src='https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&q=80&w=1000'">
-        <div class="absolute inset-0 hero-gradient flex items-end justify-center pb-8">
+    <div id="hero-header" class="relative w-full h-56 overflow-hidden bg-emerald-900">
+        <!-- UPDATED TO .JPEG AS REQUESTED -->
+        <img src="hero.jpeg" class="w-full h-full object-cover opacity-80">
+        <div class="absolute inset-0 hero-gradient flex items-end justify-center pb-10">
             <h1 class="text-white text-4xl font-black italic tracking-tighter uppercase text-center border-y-2 border-white/30 py-2 px-8">
                 Live Leaderboard
             </h1>
@@ -39,33 +42,33 @@
 
     <!-- NAVIGATION -->
     <nav class="bg-emerald-900 text-white sticky top-0 z-50 shadow-xl">
-        <div class="flex justify-around p-3 text-[11px] font-black uppercase tracking-widest text-center">
-            <button onclick="showTab('summary')" class="nav-btn px-1 py-2 border-b-2 border-emerald-400">Tournament Standings</button>
-            <button onclick="showTab('r1')" class="nav-btn px-1 py-2 border-b-2 border-transparent opacity-60">Round 1</button>
-            <button onclick="showTab('r2')" class="nav-btn px-1 py-2 border-b-2 border-transparent opacity-60">Round 2</button>
-            <button onclick="showTab('r3')" class="nav-btn px-1 py-2 border-b-2 border-transparent opacity-60">Round 3</button>
+        <div class="flex justify-around p-4 text-center">
+            <button onclick="showTab('summary')" class="nav-btn px-1 py-2 border-b-4 border-emerald-400">Tournament Standings</button>
+            <button onclick="showTab('r1')" class="nav-btn px-1 py-2 border-b-4 border-transparent opacity-60">Round 1</button>
+            <button onclick="showTab('r2')" class="nav-btn px-1 py-2 border-b-4 border-transparent opacity-60">Round 2</button>
+            <button onclick="showTab('r3')" class="nav-btn px-1 py-2 border-b-4 border-transparent opacity-60">Round 3</button>
         </div>
     </nav>
 
     <div class="p-3">
         <!-- TOURNAMENT STANDINGS TAB -->
         <div id="summary" class="tab-content active pt-4">
-            <div class="max-w-[100%] mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
-                <table class="w-full">
+            <div class="max-w-[100%] md:max-w-[800px] mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+                <table class="w-full table-fixed">
                     <thead>
-                        <tr class="bg-slate-900 text-white text-[11px] uppercase italic">
-                            <th class="p-4 text-left sticky-col border-none min-w-[140px]">Player Name</th>
-                            <th>HCP</th>
-                            <th>R1</th>
-                            <th>R2</th>
-                            <th>R3</th>
-                            <th class="bg-emerald-700">Earnings</th>
+                        <tr class="bg-slate-900 text-white text-[12px] uppercase italic">
+                            <th class="p-4 text-left sticky-col border-none w-[45%]">Player Name</th>
+                            <th class="w-[15%]">HCP</th>
+                            <th class="w-[10%]">R1</th>
+                            <th class="w-[10%]">R2</th>
+                            <th class="w-[10%]">R3</th>
+                            <th class="bg-emerald-700 w-[20%]">Earnings</th>
                         </tr>
                     </thead>
-                    <tbody id="roster-body" class="text-sm"></tbody>
+                    <tbody id="roster-body" class="text-base"></tbody>
                 </table>
             </div>
-            <button onclick="resetData()" class="mt-12 block mx-auto text-[10px] text-red-300 font-bold uppercase tracking-widest">Reset All Scores & Names</button>
+            <button onclick="resetData()" class="mt-16 block mx-auto text-[11px] text-red-300 font-bold uppercase tracking-widest">Reset All Scores & Names</button>
         </div>
 
         <!-- ROUND TABS -->
@@ -79,7 +82,6 @@
         const pars = [4,4,5,3,4,5,3,4,4, 4,3,4,5,4,4,3,4,5];
         const yards = [342, 422, 541, 165, 371, 519, 125, 386, 404, 394, 157, 372, 500, 456, 410, 196, 330, 552];
 
-        // STARTING STATE IS NOW BLANK
         let state = JSON.parse(localStorage.getItem('golfTripData')) || {
             players: [
                 { name: '', hdcp: 0 },
@@ -143,7 +145,7 @@
                     <td class="font-bold">${getRoundTotal('r1', i)}</td>
                     <td class="font-bold">${getRoundTotal('r2', i)}</td>
                     <td class="font-bold">${getRoundTotal('r3', i)}</td>
-                    <td class="font-black text-lg ${winnings >= 0 ? 'text-emerald-600' : 'text-red-500'}">
+                    <td class="font-black text-xl ${winnings >= 0 ? 'text-emerald-600' : 'text-red-500'}">
                         ${winnings >= 0 ? '+$'+winnings : '-$'+Math.abs(winnings)}
                     </td>
                 </tr>`;
@@ -157,7 +159,7 @@
             
             let html = `<div class="scorecard-wrapper shadow-xl rounded-2xl border border-slate-200 bg-white"><table>`;
             
-            html += `<thead><tr class="header-row"><th class="sticky-col">HOLE</th>`;
+            html += `<thead><tr class="header-row"><th class="sticky-col min-w-[100px]">HOLE</th>`;
             for(let h=1; h<=18; h++) {
                 html += `<th>${h}</th>`;
                 if(h===9) html += `<th class="subtotal-col">OUT</th>`;
@@ -171,12 +173,12 @@
             }
             html += `<td class="subtotal-col">3367</td><td class="subtotal-col">6642</td></tr>`;
 
-            html += `<tr class="bg-slate-50 font-black text-[12px]"><td class="sticky-col text-left px-3">PAR</td>`;
+            html += `<tr class="bg-slate-50 font-black text-[13px]"><td class="sticky-col text-left px-3">PAR</td>`;
             for(let h=1; h<=18; h++) {
                 html += `<td>${pars[h-1]}</td>`;
                 if(h===9) html += `<td class="subtotal-col">36</td>`;
             }
-            html += `<td class="subtotal-col">36</td><td class="subtotal-col text-base">72</td></tr>`;
+            html += `<td class="subtotal-col">36</td><td class="subtotal-col text-lg">72</td></tr>`;
 
             pOrder.forEach((pIdx, count) => {
                 const p = state.players[pIdx];
@@ -191,20 +193,20 @@
                     const sCount = getStrokes(p.hdcp, h);
                     
                     html += `<td class="relative">
-                        <input type="number" inputmode="numeric" class="text-xl font-bold" value="${score}" 
+                        <input type="number" inputmode="numeric" class="text-2xl font-bold" value="${score}" 
                         onchange="state.rounds['${rId}']['h${h}_p${pIdx}']=parseInt(this.value); save(); renderRound('${rId}');">
-                        ${sCount > 0 ? `<span class="absolute top-0 right-1 text-[10px] text-red-500 font-black">${'*'.repeat(sCount)}</span>` : ''}
+                        ${sCount > 0 ? `<span class="absolute top-0 right-1 text-[11px] text-red-500 font-black">${'*'.repeat(sCount)}</span>` : ''}
                     </td>`;
                     if(h===9) html += `<td class="subtotal-col font-bold">${out || ''}</td>`;
                 }
-                html += `<td class="subtotal-col font-bold">${in9 || ''}</td><td class="subtotal-col bg-slate-50 font-black text-base">${(out+in9) || ''}</td></tr>`;
+                html += `<td class="subtotal-col font-bold">${in9 || ''}</td><td class="subtotal-col bg-slate-50 font-black text-xl">${(out+in9) || ''}</td></tr>`;
             });
 
             html += `</tbody></table></div>`;
             
             const match = getMatchStatus(rId);
-            html += `<div class="mt-8 p-8 text-center bg-white rounded-3xl shadow-xl border border-slate-100">
-                <span class="text-5xl font-black italic uppercase tracking-tighter ${match.color}">${match.text}</span>
+            html += `<div class="mt-8 p-10 text-center bg-white rounded-3xl shadow-xl border border-slate-100">
+                <span class="text-6xl font-black italic uppercase tracking-tighter ${match.color}">${match.text}</span>
             </div>`;
 
             container.innerHTML = html;
