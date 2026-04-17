@@ -3,70 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dacotah Ridge Betting</title>
+    <title>Dacotah Ridge Leaderboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #fdfbf7; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .hero-gradient {
-            background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6));
-        }
+        .hero-gradient { background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6)); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .cream-bg { background-color: #fdfbf7; }
+        .scorecard-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .sticky-col { position: sticky; left: 0; background: white; z-index: 20; border-right: 2px solid #e2e8f0; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #e2e8f0; min-width: 42px; height: 44px; text-align: center; vertical-align: middle; }
+        .bg-cream { background-color: #fdfbf7; }
+        .header-row { background: #1e293b; color: white; font-size: 10px; font-weight: 900; }
+        .info-row { background: #f8fafc; color: #64748b; font-size: 9px; font-weight: bold; }
+        .subtotal-col { background: #f1f5f9; font-weight: 800; min-width: 50px; font-size: 11px; }
     </style>
 </head>
 <body class="pb-20 text-slate-900">
 
-    <!-- HERO SECTION (Summary Page Only) -->
-    <div id="hero-header" class="relative w-full h-56 overflow-hidden bg-black">
-        <img src="hero.jpg" class="w-full h-full object-cover opacity-70" alt="Dacotah Ridge">
-        <div class="absolute inset-0 hero-gradient flex items-center justify-center">
-            <h1 class="text-white text-4xl font-black italic tracking-tighter uppercase text-center border-y-2 border-white/30 py-2 px-6">
+    <!-- HERO SECTION -->
+    <div id="hero-header" class="relative w-full h-48 overflow-hidden bg-emerald-900">
+        <img src="hero.jpg" class="w-full h-full object-cover opacity-70" onerror="this.src='https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&q=80&w=1000'">
+        <div class="absolute inset-0 hero-gradient flex items-end justify-center pb-6">
+            <h1 class="text-white text-3xl font-black italic tracking-tighter uppercase text-center border-y-2 border-white/30 py-1 px-6">
                 Live Leaderboard
             </h1>
         </div>
     </div>
 
-    <!-- STICKY NAV -->
+    <!-- NAVIGATION -->
     <nav class="bg-emerald-900 text-white sticky top-0 z-50 shadow-xl">
-        <div class="flex justify-around p-3 text-xs font-bold uppercase tracking-widest">
-            <button onclick="showTab('summary')" class="nav-btn px-4 py-2 border-b-2 border-emerald-400">Home</button>
-            <button onclick="showTab('r1')" class="nav-btn px-4 py-2 border-b-2 border-transparent opacity-60">R1</button>
-            <button onclick="showTab('r2')" class="nav-btn px-4 py-2 border-b-2 border-transparent opacity-60">R2</button>
-            <button onclick="showTab('r3')" class="nav-btn px-4 py-2 border-b-2 border-transparent opacity-60">R3</button>
+        <div class="flex justify-around p-3 text-[10px] font-black uppercase tracking-widest">
+            <button onclick="showTab('summary')" class="nav-btn px-2 py-2 border-b-2 border-emerald-400">Tournament Standings</button>
+            <button onclick="showTab('r1')" class="nav-btn px-2 py-2 border-b-2 border-transparent opacity-60">R1</button>
+            <button onclick="showTab('r2')" class="nav-btn px-2 py-2 border-b-2 border-transparent opacity-60">R2</button>
+            <button onclick="showTab('r3')" class="nav-btn px-2 py-2 border-b-2 border-transparent opacity-60">R3</button>
         </div>
     </nav>
 
-    <div class="max-w-md mx-auto p-4 cream-bg min-h-screen">
-        
-        <!-- SUMMARY TAB -->
-        <div id="summary" class="tab-content active space-y-6">
-            
-            <!-- TRIP TOTALS (The Betting Dashboard) -->
-            <div class="space-y-3">
-                <h2 class="text-xs font-black text-emerald-800 uppercase tracking-widest flex items-center">
-                    <span class="bg-emerald-800 text-white px-2 py-0.5 rounded mr-2">Trip Profit</span> Standing
-                </h2>
-                <div id="overall-standings" class="space-y-3">
-                    <!-- Money totals here -->
-                </div>
+    <div class="p-2">
+        <!-- TOURNAMENT STANDINGS TAB -->
+        <div id="summary" class="tab-content active pt-4">
+            <div class="max-w-[95%] mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-slate-900 text-white text-[10px] uppercase italic">
+                            <th class="p-3 text-left sticky-col border-none">Player</th>
+                            <th>HCP</th>
+                            <th>R1</th>
+                            <th>R2</th>
+                            <th>R3</th>
+                            <th class="bg-emerald-700">Earnings</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roster-body" class="text-xs"></tbody>
+                </table>
             </div>
 
-            <!-- PLAYER SETUP -->
-            <div class="bg-white p-5 rounded-2xl shadow-md border border-slate-200">
-                <h2 class="font-black text-slate-800 uppercase text-xs mb-4 flex justify-between">
-                    Player Roster <span>HDCP</span>
-                </h2>
-                <div class="space-y-3" id="setup-inputs">
-                    <!-- Setup inputs generated by JS -->
-                </div>
+            <!-- HDCP Adjustments -->
+            <div class="max-w-[80%] mx-auto mt-10 p-5 bg-white rounded-xl shadow-inner border border-slate-100">
+                <p class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest">Manage Roster & HCP</p>
+                <div id="setup-inputs" class="space-y-4"></div>
+                <button onclick="resetData()" class="mt-10 block mx-auto text-[9px] text-red-300 font-bold uppercase tracking-widest hover:text-red-500">Reset Trip Data</button>
             </div>
-
-            <div id="team-assignments" class="text-center italic text-slate-500 text-sm py-4 border-t border-slate-200"></div>
-            
-            <button onclick="resetData()" class="w-full text-[10px] text-slate-400 uppercase tracking-widest mt-10">Clear All Trip Data</button>
         </div>
 
         <!-- ROUND TABS -->
@@ -76,8 +78,11 @@
     </div>
 
     <script>
+        // COURSE DATA
         const holeIndices = [15, 1, 3, 13, 9, 7, 17, 11, 5, 12, 14, 4, 8, 2, 10, 16, 18, 6];
-        
+        const pars = [4,4,5,3,4,5,3,4,4, 4,3,4,5,4,4,3,4,5];
+        const yards = [342, 422, 541, 165, 371, 519, 125, 386, 404, 394, 157, 372, 500, 456, 410, 196, 330, 552];
+
         let state = JSON.parse(localStorage.getItem('golfTripData')) || {
             players: [
                 { name: 'Player 1', hdcp: 10 },
@@ -93,145 +98,176 @@
             renderSummary();
         }
 
-        function resetData() {
-            if(confirm("Wipe all scores and money?")) {
-                localStorage.removeItem('golfTripData');
-                location.reload();
-            }
-        }
+        function resetData() { if(confirm("Wipe everything?")) { localStorage.removeItem('golfTripData'); location.reload(); } }
 
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            
-            // UI Visuals for Tab bar
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.add('opacity-60', 'border-transparent');
-                btn.classList.remove('border-emerald-400');
-            });
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.add('opacity-60', 'border-transparent'));
             event.currentTarget.classList.remove('opacity-60', 'border-transparent');
             event.currentTarget.classList.add('border-emerald-400');
-
-            // Hide hero on round tabs to save space
             document.getElementById('hero-header').style.display = (tabId === 'summary') ? 'block' : 'none';
-
-            window.scrollTo(0,0);
             if(tabId !== 'summary') renderRound(tabId);
         }
 
-        function getStrokesForHole(hdcp, holeIdx) {
-            let strokes = 0;
-            let tempHdcp = hdcp;
-            while (tempHdcp > 0) {
-                if (tempHdcp >= holeIndices[holeIdx-1]) strokes++;
-                tempHdcp -= 18;
-            }
-            return strokes;
+        function getStrokes(hdcp, hIdx) {
+            let s = 0; let temp = hdcp;
+            while (temp > 0) { if (temp >= holeIndices[hIdx-1]) s++; temp -= 18; }
+            return s;
         }
 
         function getTeams() {
-            let sorted = state.players.map((p, i) => ({...p, id: i})).sort((a,b) => a.hdcp - b.hdcp);
-            return { teamA: [sorted[0].id, sorted[3].id], teamB: [sorted[1].id, sorted[2].id] };
+            let s = [...state.players].map((p, i) => ({...p, id: i})).sort((a,b) => a.hdcp - b.hdcp);
+            return { teamA: [s[0].id, s[3].id], teamB: [s[1].id, s[2].id] };
         }
 
-        function renderSetup() {
-            document.getElementById('setup-inputs').innerHTML = state.players.map((p, i) => `
-                <div class="flex items-center space-x-2">
-                    <input class="flex-grow border-b-2 border-slate-100 p-1 font-bold focus:border-emerald-500 outline-none transition-colors" value="${p.name}" onchange="state.players[${i}].name=this.value; save(); renderTeams();">
-                    <input class="w-12 border rounded bg-slate-50 p-1 text-center font-bold" type="number" value="${p.hdcp}" onchange="state.players[${i}].hdcp=parseInt(this.value)||0; save(); renderTeams();">
-                </div>
-            `).join('');
-            renderTeams();
-        }
-
-        function renderTeams() {
-            const teams = getTeams();
-            document.getElementById('team-assignments').innerHTML = `
-                Team A: ${state.players[teams.teamA[0]].name} & ${state.players[teams.teamA[1]].name}<br>
-                vs<br>
-                Team B: ${state.players[teams.teamB[0]].name} & ${state.players[teams.teamB[1]].name}
-            `;
-        }
-
-        function renderRound(roundId) {
-            const container = document.getElementById(roundId);
-            let html = `<div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden mb-6">
-                <table class="w-full text-center text-xs">
-                    <thead>
-                        <tr class="bg-emerald-900 text-white">
-                            <th class="p-4 text-left">HOLE</th>
-                            ${state.players.map(p => `<th class="p-1 font-black uppercase text-[9px]">${p.name.substring(0,4)}</th>`).join('')}
-                        </tr>
-                    </thead>
-                    <tbody>`;
-            
-            for(let h=1; h<=18; h++) {
-                html += `<tr class="${h % 2 === 0 ? 'bg-slate-50' : 'bg-white'} border-b border-slate-100">
-                    <td class="p-3 text-left font-black text-slate-400">#${h}</td>
-                    ${state.players.map((p, i) => {
-                        const strokes = getStrokesForHole(p.hdcp, h);
-                        const val = state.rounds[roundId][`h${h}_p${i}`] || '';
-                        return `<td class="p-1 relative">
-                            <input type="number" class="w-full h-10 text-center text-xl font-bold border rounded focus:ring-2 focus:ring-emerald-500 outline-none" 
-                                value="${val}" inputmode="numeric" onchange="state.rounds['${roundId}']['h${h}_p${i}']=parseInt(this.value); save();">
-                            ${strokes > 0 ? `<span class="absolute top-0 right-1 text-red-500 font-bold text-xs">${'*'.repeat(strokes)}</span>` : ''}
-                        </td>`;
-                    }).join('')}
-                </tr>`;
-            }
-            html += `</tbody></table></div>`;
-            container.innerHTML = html;
-        }
-
-        function calculateNassau(roundId) {
-            const teams = getTeams();
-            let teamA_F = 0, teamB_F = 0, teamA_B = 0, teamB_B = 0;
-            
-            for(let h=1; h<=18; h++) {
-                const getNet = (indices) => {
-                    let scores = indices.map(idx => {
-                        let gross = state.rounds[roundId][`h${h}_p${idx}`];
-                        return gross ? gross - getStrokesForHole(state.players[idx].hdcp, h) : 999;
-                    });
-                    return Math.min(...scores);
-                };
-                let bestA = getNet(teams.teamA), bestB = getNet(teams.teamB);
-                if (bestA === 999 || bestB === 999) continue;
-                if (h <= 9) { teamA_F += bestA; teamB_F += bestB; }
-                else { teamA_B += bestA; teamB_B += bestB; }
-            }
-
-            let aWin = 0, bWin = 0;
-            if (teamA_F < teamB_F) aWin += 10; else if (teamB_F < teamA_F) bWin += 10;
-            if (teamA_B < teamB_B) aWin += 10; else if (teamB_B < teamA_B) bWin += 10;
-            if ((teamA_F+teamA_B) < (teamB_F+teamB_B)) aWin += 20; else if ((teamB_F+teamB_B) < (teamA_F+teamA_B)) bWin += 20;
-            return { a: aWin, b: bWin };
+        function getRoundTotal(rId, pIdx) {
+            let total = 0;
+            for(let h=1; h<=18; h++) total += (state.rounds[rId][`h${h}_p${pIdx}`] || 0);
+            return total || '-';
         }
 
         function renderSummary() {
-            const r1 = calculateNassau('r1'), r2 = calculateNassau('r2'), r3 = calculateNassau('r3');
-            const netA = (r1.a + r2.a + r3.a) - (r1.b + r2.b + r3.b);
             const teams = getTeams();
+            const r1m = calculateNassau('r1'), r2m = calculateNassau('r2'), r3m = calculateNassau('r3');
+            const netA = (r1m.a + r2m.a + r3m.a) - (r1m.b + r2m.b + r3m.b);
+            
+            document.getElementById('roster-body').innerHTML = state.players.map((p, i) => {
+                const winnings = teams.teamA.includes(i) ? netA : -netA;
+                return `<tr class="border-b font-medium">
+                    <td class="p-3 text-left sticky-col font-black text-slate-700">${p.name}</td>
+                    <td class="text-slate-400">${p.hdcp}</td>
+                    <td>${getRoundTotal('r1', i)}</td>
+                    <td>${getRoundTotal('r2', i)}</td>
+                    <td>${getRoundTotal('r3', i)}</td>
+                    <td class="font-black ${winnings >= 0 ? 'text-emerald-600' : 'text-red-500'}">${winnings >= 0 ? '+$'+winnings : '-$'+Math.abs(winnings)}</td>
+                </tr>`;
+            }).join('');
 
-            document.getElementById('overall-standings').innerHTML = `
-                <div class="bg-white p-5 rounded-2xl shadow-sm border-l-8 border-blue-500 flex justify-between items-center">
-                    <div>
-                        <p class="text-[10px] uppercase font-black text-slate-400">Team A (1&4)</p>
-                        <p class="font-bold text-slate-800">${state.players[teams.teamA[0]].name} & ${state.players[teams.teamA[1]].name}</p>
+            document.getElementById('setup-inputs').innerHTML = state.players.map((p, i) => `
+                <div class="flex justify-between items-center border-b border-slate-50 pb-2">
+                    <input class="font-bold text-slate-800 bg-transparent outline-none w-2/3" value="${p.name}" onchange="state.players[${i}].name=this.value; save();">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-[9px] text-slate-400">HCP</span>
+                        <input type="number" class="w-10 bg-slate-50 border rounded text-center font-bold" value="${p.hdcp}" onchange="state.players[${i}].hdcp=parseInt(this.value)||0; save();">
                     </div>
-                    <div class="text-3xl font-black ${netA >= 0 ? 'text-green-600' : 'text-red-500'}">${netA >= 0 ? '+$'+netA : '-$'+Math.abs(netA)}</div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border-l-8 border-orange-500 flex justify-between items-center">
-                    <div>
-                        <p class="text-[10px] uppercase font-black text-slate-400">Team B (2&3)</p>
-                        <p class="font-bold text-slate-800">${state.players[teams.teamB[0]].name} & ${state.players[teams.teamB[1]].name}</p>
-                    </div>
-                    <div class="text-3xl font-black ${netA <= 0 ? 'text-green-600' : 'text-red-500'}">${netA <= 0 ? '+$'+Math.abs(netA) : '-$'+netA}</div>
-                </div>
-            `;
+            `).join('');
         }
 
-        renderSetup();
+        function renderRound(rId) {
+            const container = document.getElementById(rId);
+            const teams = getTeams();
+            const pOrder = [teams.teamA[0], teams.teamA[1], teams.teamB[0], teams.teamB[1]];
+            
+            let html = `<div class="scorecard-wrapper shadow-2xl rounded-xl border border-slate-200 bg-white"><table>`;
+            
+            // Header: Hole Numbers
+            html += `<thead><tr class="header-row"><th class="sticky-col">HOLE</th>`;
+            for(let h=1; h<=18; h++) {
+                html += `<th>${h}</th>`;
+                if(h===9) html += `<th class="subtotal-col">OUT</th>`;
+            }
+            html += `<th class="subtotal-col">IN</th><th class="subtotal-col bg-emerald-700">TOT</th></tr></thead><tbody>`;
+
+            // Row: Yards
+            html += `<tr class="info-row"><td class="sticky-col text-left px-2">YARDS</td>`;
+            for(let h=1; h<=18; h++) {
+                html += `<td>${yards[h-1]}</td>`;
+                if(h===9) html += `<td class="subtotal-col">3275</td>`;
+            }
+            html += `<td class="subtotal-col">3367</td><td class="subtotal-col">6642</td></tr>`;
+
+            // Row: Handicap Index
+            html += `<tr class="info-row"><td class="sticky-col text-left px-2 italic">HCP INDEX</td>`;
+            for(let h=1; h<=18; h++) {
+                html += `<td>${holeIndices[h-1]}</td>`;
+                if(h===9) html += `<td class="subtotal-col">-</td>`;
+            }
+            html += `<td class="subtotal-col">-</td><td class="subtotal-col">-</td></tr>`;
+
+            // Row: Par
+            html += `<tr class="bg-slate-50 font-black text-[10px]"><td class="sticky-col text-left px-2">PAR</td>`;
+            for(let h=1; h<=18; h++) {
+                html += `<td>${pars[h-1]}</td>`;
+                if(h===9) html += `<td class="subtotal-col">36</td>`;
+            }
+            html += `<td class="subtotal-col">36</td><td class="subtotal-col">72</td></tr>`;
+
+            // Player Rows
+            pOrder.forEach((pIdx, count) => {
+                const p = state.players[pIdx];
+                const borderClass = count < 2 ? 'border-l-4 border-emerald-500' : 'border-l-4 border-blue-500';
+                let out = 0; let in9 = 0;
+
+                html += `<tr><td class="sticky-col text-left px-2 font-black text-slate-700 ${borderClass}">${p.name}</td>`;
+                for(let h=1; h<=18; h++) {
+                    const score = state.rounds[rId][`h${h}_p${pIdx}`] || '';
+                    if(h<=9) out += (score || 0); else in9 += (score || 0);
+                    const sCount = getStrokes(p.hdcp, h);
+                    
+                    html += `<td class="relative">
+                        <input type="number" inputmode="numeric" class="w-full h-full text-center text-lg font-bold outline-none" value="${score}" 
+                        onchange="state.rounds['${rId}']['h${h}_p${pIdx}']=parseInt(this.value); save(); renderRound('${rId}');">
+                        ${sCount > 0 ? `<span class="absolute top-0 right-0.5 text-[8px] text-red-500 font-black">${'*'.repeat(sCount)}</span>` : ''}
+                    </td>`;
+                    if(h===9) html += `<td class="subtotal-col">${out || ''}</td>`;
+                }
+                html += `<td class="subtotal-col">${in9 || ''}</td><td class="subtotal-col bg-slate-50">${(out+in9) || ''}</td></tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+            
+            // Match Status
+            const match = getMatchStatus(rId);
+            html += `<div class="mt-8 p-6 text-center bg-white rounded-xl shadow-lg border border-slate-100">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Live Match Score</p>
+                <span class="text-3xl font-black italic uppercase tracking-tighter ${match.color}">${match.text}</span>
+            </div>`;
+
+            container.innerHTML = html;
+        }
+
+        function getMatchStatus(rId) {
+            const teams = getTeams();
+            let aUp = 0; let bUp = 0;
+            for(let h=1; h<=18; h++) {
+                const getNet = (ids) => {
+                    let scs = ids.map(id => {
+                        let g = state.rounds[rId][`h${h}_p${id}`];
+                        return g ? g - getStrokes(state.players[id].hdcp, h) : 999;
+                    });
+                    return Math.min(...scs);
+                };
+                let bA = getNet(teams.teamA); let bB = getNet(teams.teamB);
+                if(bA < bB && bA < 900) aUp++; else if(bB < bA && bB < 900) bUp++;
+            }
+            if(aUp === bUp) return { text: "All Square", color: "text-slate-900" };
+            return aUp > bUp ? { text: `Team A ${aUp - bUp} UP`, color: "text-emerald-600" } : { text: `Team B ${bUp - aUp} UP`, color: "text-blue-600" };
+        }
+
+        function calculateNassau(rId) {
+            const teams = getTeams();
+            let aF = 0, bF = 0, aB = 0, bB = 0;
+            for(let h=1; h<=18; h++) {
+                const getNet = (ids) => {
+                    let scs = ids.map(id => {
+                        let g = state.rounds[rId][`h${h}_p${id}`];
+                        return g ? g - getStrokes(state.players[id].hdcp, h) : 999;
+                    });
+                    return Math.min(...scs);
+                };
+                let bA = getNet(teams.teamA), bB = getNet(teams.teamB);
+                if(bA === 999 || bB === 999) continue;
+                if(h<=9) { aF += bA; bF += bB; } else { aB += bA; bB += bB; }
+            }
+            let aW = 0, bW = 0;
+            if(aF < bF) aW += 10; else if(bF < aF) bW += 10;
+            if(aB < bB) aW += 10; else if(bB < aB) bW += 10;
+            if((aF+aB) < (bF+bB)) aW += 20; else if((bF+bB) < (aF+aB)) bW += 20;
+            return { a: aW, b: bW };
+        }
+
         renderSummary();
     </script>
 </body>
