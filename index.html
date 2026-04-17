@@ -11,19 +11,13 @@
         .tab-content { display: none; min-height: 80vh; }
         .tab-content.active { display: block; }
         
-        /* Home Tab Hub - Image Background */
         #tab-home {
             background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.8)), url('hero.jpeg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            min-height: 100vh;
+            background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh;
         }
 
-        .hero-gradient { background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6)); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         
-        /* Scorecard UI */
         .scorecard-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .sticky-col { position: sticky; left: 0; background: white; z-index: 20; border-right: 2px solid #e2e8f0; }
         table { border-collapse: collapse; width: 100%; }
@@ -32,13 +26,15 @@
         .header-row { background: #1e293b; color: white; font-size: 14px; font-weight: 900; }
         .small-row { height: 35px !important; font-size: 11px; background: #f8fafc; color: #64748b; font-weight: bold; }
         .par-row { height: 45px !important; background: #f1f5f9; font-weight: 900; font-size: 15px; }
-        .subtotal-col { background: #f1f5f9; font-weight: 800; min-width: 75px; font-size: 18px; }
         
-        /* Match Rows - Dynamic Colors */
+        /* Grey Subtotal Columns */
+        .subtotal-col { background: #f8fafc; font-weight: bold; min-width: 75px; font-size: 12px; color: #64748b; }
+        .total-final-col { background: #f1f5f9; font-weight: 800; min-width: 80px; font-size: 18px; color: #1e293b; }
+        
         .match-row { background: #ffffff; font-weight: 900; font-size: 18px; border-top: 2px solid #e2e8f0; }
         .text-red-lead { color: #ef4444 !important; }
         .text-blue-lead { color: #3b82f6 !important; }
-        .text-as { color: #1e293b !important; }
+        .text-as { color: #94a3b8 !important; font-size: 14px; }
 
         input { background: transparent; outline: none; width: 100%; height: 100%; text-align: center; font-weight: inherit; font-size: 20px; }
         .name-input { text-align: left; padding-left: 12px; font-weight: 800; font-size: 18px; }
@@ -62,15 +58,13 @@
 </head>
 <body class="pb-20">
 
-    <!-- DYNAMIC HEADER -->
     <header id="main-header" class="relative w-full h-48 overflow-hidden bg-emerald-900 shadow-xl" style="display:none;">
         <img src="hero.jpeg" class="w-full h-full object-cover opacity-80" onerror="this.style.display='none'">
-        <div class="absolute inset-0 hero-gradient flex items-end justify-center pb-8 text-center">
+        <div class="absolute inset-0 flex items-end justify-center pb-8 text-center">
             <h1 id="header-title" class="text-white text-4xl font-black italic tracking-tighter uppercase px-6">Live Leaderboard</h1>
         </div>
     </header>
 
-    <!-- NAVIGATION -->
     <nav class="bg-emerald-900 text-white sticky top-0 z-50 shadow-xl overflow-x-auto no-scrollbar">
         <div class="flex px-2" id="nav-bar"></div>
     </nav>
@@ -83,8 +77,7 @@
                 <div id="roster-setup" class="space-y-5"></div>
                 <button onclick="addPlayer()" class="w-full mt-6 py-4 bg-white/5 text-white/70 font-black rounded-xl uppercase text-[10px] tracking-widest border border-white/10">+ Add Player</button>
             </div>
-            
-            <button onclick="addRound()" class="w-full py-6 bg-emerald-500 text-white font-black rounded-3xl uppercase tracking-widest shadow-2xl active:scale-95 transition-transform text-lg">Start Next Round</button>
+            <button onclick="addRound()" class="w-full py-6 bg-emerald-500 text-white font-black rounded-3xl uppercase tracking-widest shadow-2xl text-lg">Start Next Round</button>
             <button onclick="resetData()" class="block mx-auto text-[10px] text-white/30 font-bold uppercase underline">Reset Everything</button>
         </div>
 
@@ -111,12 +104,12 @@
         const pars = [4,4,5,3,4,5,3,4,4, 4,3,4,5,4,4,3,4,5];
         const yards = [342, 422, 541, 165, 371, 519, 125, 386, 404, 394, 157, 372, 500, 456, 410, 196, 330, 552];
 
-        let state = JSON.parse(localStorage.getItem('golfTripV7')) || {
+        let state = JSON.parse(localStorage.getItem('golfTripV8')) || {
             players: [{ name: '', hdcp: 0, team: 'none' }],
             rounds: []
         };
 
-        function save() { localStorage.setItem('golfTripV7', JSON.stringify(state)); }
+        function save() { localStorage.setItem('golfTripV8', JSON.stringify(state)); }
 
         function init() {
             renderNav();
@@ -167,19 +160,13 @@
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             const target = document.getElementById('tab-' + tabId);
             if(target) target.classList.add('active');
-            
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-nav'));
             const nav = document.getElementById('nav-' + tabId);
             if(nav) nav.classList.add('active-nav');
-
             const header = document.getElementById('main-header');
             const title = document.getElementById('header-title');
-            if (tabId === 'home') {
-                header.style.display = 'none';
-            } else {
-                header.style.display = 'block';
-                title.innerText = (tabId === 'summary') ? "Live Leaderboard" : ("Round " + tabId.replace('r',''));
-            }
+            if (tabId === 'home') header.style.display = 'none';
+            else { header.style.display = 'block'; title.innerText = (tabId === 'summary') ? "Live Leaderboard" : ("Round " + tabId.replace('r','')); }
         }
 
         function renderAllRounds() {
@@ -218,12 +205,12 @@
             let html = `<div class="scorecard-wrapper shadow-2xl rounded-3xl border border-slate-200 bg-white"><table>`;
             html += `<thead><tr class="header-row"><th class="sticky-col min-w-[130px]">HOLE</th>`;
             for(let h=1; h<=18; h++) { html += `<th>${h}</th>`; if(h===9) html += `<th class="subtotal-col">OUT</th>`; }
-            html += `<th class="subtotal-col">IN</th><th class="subtotal-col bg-emerald-700">TOT</th></tr></thead><tbody>`;
+            html += `<th class="subtotal-col">IN</th><th class="total-final-col bg-emerald-700 text-white">TOT</th></tr></thead><tbody>`;
 
             const small = (label, data, sub) => {
                 let row = `<tr class="small-row"><td class="sticky-col text-left px-3 uppercase">${label}</td>`;
                 for(let h=1; h<=18; h++) { row += `<td>${data[h-1]}</td>`; if(h===9) row += `<td class="subtotal-col">${sub[0]}</td>`; }
-                row += `<td class="subtotal-col">${sub[1]}</td><td class="subtotal-col">${sub[2]}</td></tr>`; return row;
+                row += `<td class="subtotal-col">${sub[1]}</td><td class="total-final-col font-bold text-xs">${sub[2]}</td></tr>`; return row;
             }
             html += small('Yards', yards, [3275, 3367, 6642]);
             html += small('HCP Index', holeIndices, ['', '', '']);
@@ -239,14 +226,14 @@
                         <input type="number" inputmode="numeric" value="${score}" oninput="state.rounds.find(x=>x.id===${rId}).scores['h${h}_p${pIdx}']=parseInt(this.value)||0;save();updateLiveMatch(${rId});">
                         ${getStrokes(p.hdcp, h) > 0 ? `<span class="absolute top-0 right-1 text-[10px] text-red-500 font-black">${'*'.repeat(getStrokes(p.hdcp,h))}</span>` : ''}
                     </td>`;
-                    if(h===9) html += `<td class="subtotal-col font-bold">${out || ''}</td>`;
+                    if(h===9) html += `<td class="subtotal-col">${out || ''}</td>`;
                 }
-                html += `<td class="subtotal-col font-bold">${in9 || ''}</td><td class="subtotal-col bg-slate-50 font-black text-xl">${(out+in9) || ''}</td></tr>`;
+                html += `<td class="subtotal-col">${in9 || ''}</td><td class="total-final-col font-black text-xl">${(out+in9) || ''}</td></tr>`;
             });
 
             if (r.game === 'nassau') {
-                html += `<tr class="match-row" id="row-side-${rId}"><td class="sticky-col text-left px-3 uppercase text-xs">Side</td></tr>`;
-                html += `<tr class="match-row border-t-2" id="row-overall-${rId}"><td class="sticky-col text-left px-3 uppercase text-xs">Overall</td></tr>`;
+                html += `<tr class="match-row" id="row-side-${rId}"><td class="sticky-col text-left px-3 uppercase text-xs font-black">Side</td></tr>`;
+                html += `<tr class="match-row border-t-2" id="row-overall-${rId}"><td class="sticky-col text-left px-3 uppercase text-xs font-black">Overall</td></tr>`;
             }
             html += `</tbody></table></div>`;
             container.innerHTML = html;
@@ -255,34 +242,33 @@
 
         function updateLiveMatch(rId) {
             const r = state.rounds.find(x => x.id === rId);
-            if (!r || r.game !== 'nassau') return;
-            
-            let rF = 0, bF = 0, rB = 0, bB = 0, rT = 0, bT = 0;
             const sideRow = document.getElementById(`row-side-${rId}`);
             const overRow = document.getElementById(`row-overall-${rId}`);
             if(!sideRow || !overRow) return;
 
+            let rFrontWins = 0, bFrontWins = 0, rBackWins = 0, bBackWins = 0;
             let sideHtml = `<td class="sticky-col text-left px-3 uppercase text-xs font-black">Side</td>`;
             let overHtml = `<td class="sticky-col text-left px-3 uppercase text-xs font-black">Overall</td>`;
 
             for(let h=1; h<=18; h++) {
-                const net = (c) => Math.min(...state.players.map((p,i)=>(p.team===c && r.scores[`h${h}_p${i}`])?r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h):999));
-                let red = net('red'), blue = net('blue');
+                const getNet = (c) => {
+                    let s = state.players.map((p,i)=>(p.team===c && r.scores[`h${h}_p${i}`])?r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h):999);
+                    return Math.min(...s);
+                };
+                let red = getNet('red'), blue = getNet('blue');
                 
                 if(red < 900 && blue < 900) {
-                    if(h<=9) { rF += red; bF += blue; } else { rB += red; bB += blue; }
-                    rT += red; bT += blue;
+                    if (red < blue) { if(h<=9) rFrontWins++; else rBackWins++; }
+                    else if (blue < red) { if(h<=9) bFrontWins++; else bBackWins++; }
                 }
 
-                const getFmt = (rv, bv) => {
-                    if (rv >= 900 || bv >= 900 || (rv === 0 && bv === 0)) return {v:'-',c:''};
-                    if (rv === bv) return {v:'AS',c:'text-as'};
-                    if (rv < bv) return {v: (bv-rv) + ' ↑', c:'text-red-lead'};
-                    return {v: (rv-bv) + ' ↑', c:'text-blue-lead'};
+                const getMatchStatus = (rW, bW) => {
+                    if (rW === bW) return {v:'AS',c:'text-as'};
+                    return rW > bW ? {v: (rW-bW) + ' ↑', c:'text-red-lead'} : {v: (bW-rW) + ' ↑', c:'text-blue-lead'};
                 };
 
-                const s = h<=9 ? getFmt(rF, bF) : getFmt(rB, bB);
-                const o = getFmt(rT, bT);
+                const s = h<=9 ? getMatchStatus(rFrontWins, bFrontWins) : getMatchStatus(rBackWins, bBackWins);
+                const o = getMatchStatus(rFrontWins + rBackWins, bFrontWins + bBackWins);
 
                 sideHtml += `<td class="${s.c}">${s.v}</td>`;
                 overHtml += `<td class="${o.c}">${o.v}</td>`;
@@ -298,15 +284,18 @@
                 if(r.game === 'nassau') {
                     let rF=0, bF=0, rB=0, bB=0;
                     for(let h=1; h<=18; h++) {
-                        const net = (c) => Math.min(...state.players.map((p,i)=>(p.team===c&&r.scores[`h${h}_p${i}`])?r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h):999));
-                        let nr=net('red'), nb=net('blue');
-                        if(nr<900 && nb<900) { if(h<=9){rF+=nr;bF+=nb;}else{rB+=nr;bB+=nb;} }
+                        const getNet = (c) => Math.min(...state.players.map((p,i)=>(p.team===c&&r.scores[`h${h}_p${i}`])?r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h):999));
+                        let nr=getNet('red'), nb=getNet('blue');
+                        if(nr<900 && nb<900) {
+                            if (nr < nb) { if(h<=9) rF++; else rB++; }
+                            else if (nb < nr) { if(h<=9) bF++; else bB++; }
+                        }
                     }
                     let rw=0; 
-                    if(rF<bF)rw+=r.bets[0]; else if(bF<rF)rw-=r.bets[0];
-                    if(rB<bB)rw+=r.bets[1]; else if(bB<rB)rw-=r.bets[1];
-                    if((rF+rB)<(bF+bB))rw+=r.bets[2]; else if((bF+bB)<(rF+rB))rw-=r.bets[2];
-                    state.players.forEach((p,i)=>{if(p.team==='red')cash[i]+=rw; if(p.team==='blue')cash[i]-=rw;});
+                    if(rF > bF) rw += r.bets[0]; else if(bF > rF) rw -= r.bets[0];
+                    if(rB > bB) rw += r.bets[1]; else if(bB > rB) rw -= r.bets[1];
+                    if((rF + rB) > (bF + bB)) rw += r.bets[2]; else if((bF + bB) > (rF + rB)) rw -= r.bets[2];
+                    state.players.forEach((p,i)=>{ if(p.team==='red') cash[i]+=rw; if(p.team==='blue') cash[i]-=rw; });
                 }
             });
             document.getElementById('standings-body').innerHTML = state.players.map((p,i)=>`
@@ -318,7 +307,7 @@
         function updateRoundGame(id, val) { state.rounds.find(x=>x.id===id).game=val; save(); renderAllRounds(); showTab('r'+id); }
         function updateRoundBet(id, idx, val) { state.rounds.find(x=>x.id===id).bets[idx]=parseInt(val)||0; save(); renderStandings(); }
         function getStrokes(hdcp, hIdx) { let s=0; let t=hdcp; while(t>0){if(t>=holeIndices[hIdx-1])s++; t-=18;} return s; }
-        function resetData() { if(confirm("Wipe everything?")) { localStorage.removeItem('golfTripV7'); location.reload(); } }
+        function resetData() { if(confirm("Wipe Trip?")) { localStorage.removeItem('golfTripV8'); location.reload(); } }
 
         init();
     </script>
