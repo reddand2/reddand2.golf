@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #fdfbf7; }
+        body { font-family: 'Inter', sans-serif; background-color: #fdfbf7; font-size: 16px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .hero-gradient { background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6)); }
@@ -15,20 +15,23 @@
         .scorecard-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .sticky-col { position: sticky; left: 0; background: white; z-index: 20; border-right: 2px solid #e2e8f0; }
         table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #e2e8f0; min-width: 42px; height: 44px; text-align: center; vertical-align: middle; }
-        .bg-cream { background-color: #fdfbf7; }
-        .header-row { background: #1e293b; color: white; font-size: 10px; font-weight: 900; }
-        .info-row { background: #f8fafc; color: #64748b; font-size: 9px; font-weight: bold; }
-        .subtotal-col { background: #f1f5f9; font-weight: 800; min-width: 50px; font-size: 11px; }
+        th, td { border: 1px solid #e2e8f0; min-width: 50px; height: 55px; text-align: center; vertical-align: middle; }
+        .header-row { background: #1e293b; color: white; font-size: 12px; font-weight: 900; }
+        .info-row { background: #f8fafc; color: #64748b; font-size: 11px; font-weight: bold; }
+        .subtotal-col { background: #f1f5f9; font-weight: 800; min-width: 60px; font-size: 14px; }
+        input { background: transparent; outline: none; width: 100%; height: 100%; text-align: center; font-weight: inherit; }
+        .name-input { text-align: left; padding-left: 12px; font-weight: 800; font-size: 16px; }
+        /* Placeholder styling */
+        ::placeholder { color: #cbd5e1; font-weight: 400; font-style: italic; }
     </style>
 </head>
 <body class="pb-20 text-slate-900">
 
     <!-- HERO SECTION -->
-    <div id="hero-header" class="relative w-full h-48 overflow-hidden bg-emerald-900">
+    <div id="hero-header" class="relative w-full h-52 overflow-hidden bg-emerald-900">
         <img src="hero.jpg" class="w-full h-full object-cover opacity-70" onerror="this.src='https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?auto=format&fit=crop&q=80&w=1000'">
-        <div class="absolute inset-0 hero-gradient flex items-end justify-center pb-6">
-            <h1 class="text-white text-3xl font-black italic tracking-tighter uppercase text-center border-y-2 border-white/30 py-1 px-6">
+        <div class="absolute inset-0 hero-gradient flex items-end justify-center pb-8">
+            <h1 class="text-white text-4xl font-black italic tracking-tighter uppercase text-center border-y-2 border-white/30 py-2 px-8">
                 Live Leaderboard
             </h1>
         </div>
@@ -36,22 +39,22 @@
 
     <!-- NAVIGATION -->
     <nav class="bg-emerald-900 text-white sticky top-0 z-50 shadow-xl">
-        <div class="flex justify-around p-3 text-[10px] font-black uppercase tracking-widest">
-            <button onclick="showTab('summary')" class="nav-btn px-2 py-2 border-b-2 border-emerald-400">Tournament Standings</button>
-            <button onclick="showTab('r1')" class="nav-btn px-2 py-2 border-b-2 border-transparent opacity-60">R1</button>
-            <button onclick="showTab('r2')" class="nav-btn px-2 py-2 border-b-2 border-transparent opacity-60">R2</button>
-            <button onclick="showTab('r3')" class="nav-btn px-2 py-2 border-b-2 border-transparent opacity-60">R3</button>
+        <div class="flex justify-around p-3 text-[11px] font-black uppercase tracking-widest text-center">
+            <button onclick="showTab('summary')" class="nav-btn px-1 py-2 border-b-2 border-emerald-400">Tournament Standings</button>
+            <button onclick="showTab('r1')" class="nav-btn px-1 py-2 border-b-2 border-transparent opacity-60">Round 1</button>
+            <button onclick="showTab('r2')" class="nav-btn px-1 py-2 border-b-2 border-transparent opacity-60">Round 2</button>
+            <button onclick="showTab('r3')" class="nav-btn px-1 py-2 border-b-2 border-transparent opacity-60">Round 3</button>
         </div>
     </nav>
 
-    <div class="p-2">
+    <div class="p-3">
         <!-- TOURNAMENT STANDINGS TAB -->
         <div id="summary" class="tab-content active pt-4">
-            <div class="max-w-[95%] mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+            <div class="max-w-[100%] mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
                 <table class="w-full">
                     <thead>
-                        <tr class="bg-slate-900 text-white text-[10px] uppercase italic">
-                            <th class="p-3 text-left sticky-col border-none">Player</th>
+                        <tr class="bg-slate-900 text-white text-[11px] uppercase italic">
+                            <th class="p-4 text-left sticky-col border-none min-w-[140px]">Player Name</th>
                             <th>HCP</th>
                             <th>R1</th>
                             <th>R2</th>
@@ -59,16 +62,10 @@
                             <th class="bg-emerald-700">Earnings</th>
                         </tr>
                     </thead>
-                    <tbody id="roster-body" class="text-xs"></tbody>
+                    <tbody id="roster-body" class="text-sm"></tbody>
                 </table>
             </div>
-
-            <!-- HDCP Adjustments -->
-            <div class="max-w-[80%] mx-auto mt-10 p-5 bg-white rounded-xl shadow-inner border border-slate-100">
-                <p class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest">Manage Roster & HCP</p>
-                <div id="setup-inputs" class="space-y-4"></div>
-                <button onclick="resetData()" class="mt-10 block mx-auto text-[9px] text-red-300 font-bold uppercase tracking-widest hover:text-red-500">Reset Trip Data</button>
-            </div>
+            <button onclick="resetData()" class="mt-12 block mx-auto text-[10px] text-red-300 font-bold uppercase tracking-widest">Reset All Scores & Names</button>
         </div>
 
         <!-- ROUND TABS -->
@@ -78,17 +75,17 @@
     </div>
 
     <script>
-        // COURSE DATA
         const holeIndices = [15, 1, 3, 13, 9, 7, 17, 11, 5, 12, 14, 4, 8, 2, 10, 16, 18, 6];
         const pars = [4,4,5,3,4,5,3,4,4, 4,3,4,5,4,4,3,4,5];
         const yards = [342, 422, 541, 165, 371, 519, 125, 386, 404, 394, 157, 372, 500, 456, 410, 196, 330, 552];
 
+        // STARTING STATE IS NOW BLANK
         let state = JSON.parse(localStorage.getItem('golfTripData')) || {
             players: [
-                { name: 'Player 1', hdcp: 10 },
-                { name: 'Player 2', hdcp: 12 },
-                { name: 'Player 3', hdcp: 15 },
-                { name: 'Player 4', hdcp: 20 }
+                { name: '', hdcp: 0 },
+                { name: '', hdcp: 0 },
+                { name: '', hdcp: 0 },
+                { name: '', hdcp: 0 }
             ],
             rounds: { r1: {}, r2: {}, r3: {} }
         };
@@ -98,7 +95,7 @@
             renderSummary();
         }
 
-        function resetData() { if(confirm("Wipe everything?")) { localStorage.removeItem('golfTripData'); location.reload(); } }
+        function resetData() { if(confirm("This will wipe all names and scores. Proceed?")) { localStorage.removeItem('golfTripData'); location.reload(); } }
 
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -134,25 +131,23 @@
             
             document.getElementById('roster-body').innerHTML = state.players.map((p, i) => {
                 const winnings = teams.teamA.includes(i) ? netA : -netA;
-                return `<tr class="border-b font-medium">
-                    <td class="p-3 text-left sticky-col font-black text-slate-700">${p.name}</td>
-                    <td class="text-slate-400">${p.hdcp}</td>
-                    <td>${getRoundTotal('r1', i)}</td>
-                    <td>${getRoundTotal('r2', i)}</td>
-                    <td>${getRoundTotal('r3', i)}</td>
-                    <td class="font-black ${winnings >= 0 ? 'text-emerald-600' : 'text-red-500'}">${winnings >= 0 ? '+$'+winnings : '-$'+Math.abs(winnings)}</td>
+                const teamColor = teams.teamA.includes(i) ? 'border-emerald-500' : 'border-blue-500';
+                
+                return `<tr class="border-b">
+                    <td class="text-left sticky-col border-l-8 ${teamColor}">
+                        <input type="text" class="name-input" placeholder="Enter Name" value="${p.name}" onchange="state.players[${i}].name=this.value; save();">
+                    </td>
+                    <td>
+                        <input type="number" class="text-slate-400 font-bold" value="${p.hdcp}" onchange="state.players[${i}].hdcp=parseInt(this.value)||0; save();">
+                    </td>
+                    <td class="font-bold">${getRoundTotal('r1', i)}</td>
+                    <td class="font-bold">${getRoundTotal('r2', i)}</td>
+                    <td class="font-bold">${getRoundTotal('r3', i)}</td>
+                    <td class="font-black text-lg ${winnings >= 0 ? 'text-emerald-600' : 'text-red-500'}">
+                        ${winnings >= 0 ? '+$'+winnings : '-$'+Math.abs(winnings)}
+                    </td>
                 </tr>`;
             }).join('');
-
-            document.getElementById('setup-inputs').innerHTML = state.players.map((p, i) => `
-                <div class="flex justify-between items-center border-b border-slate-50 pb-2">
-                    <input class="font-bold text-slate-800 bg-transparent outline-none w-2/3" value="${p.name}" onchange="state.players[${i}].name=this.value; save();">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-[9px] text-slate-400">HCP</span>
-                        <input type="number" class="w-10 bg-slate-50 border rounded text-center font-bold" value="${p.hdcp}" onchange="state.players[${i}].hdcp=parseInt(this.value)||0; save();">
-                    </div>
-                </div>
-            `).join('');
         }
 
         function renderRound(rId) {
@@ -160,9 +155,8 @@
             const teams = getTeams();
             const pOrder = [teams.teamA[0], teams.teamA[1], teams.teamB[0], teams.teamB[1]];
             
-            let html = `<div class="scorecard-wrapper shadow-2xl rounded-xl border border-slate-200 bg-white"><table>`;
+            let html = `<div class="scorecard-wrapper shadow-xl rounded-2xl border border-slate-200 bg-white"><table>`;
             
-            // Header: Hole Numbers
             html += `<thead><tr class="header-row"><th class="sticky-col">HOLE</th>`;
             for(let h=1; h<=18; h++) {
                 html += `<th>${h}</th>`;
@@ -170,59 +164,47 @@
             }
             html += `<th class="subtotal-col">IN</th><th class="subtotal-col bg-emerald-700">TOT</th></tr></thead><tbody>`;
 
-            // Row: Yards
-            html += `<tr class="info-row"><td class="sticky-col text-left px-2">YARDS</td>`;
+            html += `<tr class="info-row"><td class="sticky-col text-left px-3">YARDS</td>`;
             for(let h=1; h<=18; h++) {
                 html += `<td>${yards[h-1]}</td>`;
                 if(h===9) html += `<td class="subtotal-col">3275</td>`;
             }
             html += `<td class="subtotal-col">3367</td><td class="subtotal-col">6642</td></tr>`;
 
-            // Row: Handicap Index
-            html += `<tr class="info-row"><td class="sticky-col text-left px-2 italic">HCP INDEX</td>`;
-            for(let h=1; h<=18; h++) {
-                html += `<td>${holeIndices[h-1]}</td>`;
-                if(h===9) html += `<td class="subtotal-col">-</td>`;
-            }
-            html += `<td class="subtotal-col">-</td><td class="subtotal-col">-</td></tr>`;
-
-            // Row: Par
-            html += `<tr class="bg-slate-50 font-black text-[10px]"><td class="sticky-col text-left px-2">PAR</td>`;
+            html += `<tr class="bg-slate-50 font-black text-[12px]"><td class="sticky-col text-left px-3">PAR</td>`;
             for(let h=1; h<=18; h++) {
                 html += `<td>${pars[h-1]}</td>`;
                 if(h===9) html += `<td class="subtotal-col">36</td>`;
             }
-            html += `<td class="subtotal-col">36</td><td class="subtotal-col">72</td></tr>`;
+            html += `<td class="subtotal-col">36</td><td class="subtotal-col text-base">72</td></tr>`;
 
-            // Player Rows
             pOrder.forEach((pIdx, count) => {
                 const p = state.players[pIdx];
-                const borderClass = count < 2 ? 'border-l-4 border-emerald-500' : 'border-l-4 border-blue-500';
+                const displayName = p.name || `Player ${count+1}`;
+                const borderClass = count < 2 ? 'border-l-8 border-emerald-500' : 'border-l-8 border-blue-500';
                 let out = 0; let in9 = 0;
 
-                html += `<tr><td class="sticky-col text-left px-2 font-black text-slate-700 ${borderClass}">${p.name}</td>`;
+                html += `<tr><td class="sticky-col text-left px-3 font-black text-slate-700 ${borderClass}">${displayName}</td>`;
                 for(let h=1; h<=18; h++) {
                     const score = state.rounds[rId][`h${h}_p${pIdx}`] || '';
                     if(h<=9) out += (score || 0); else in9 += (score || 0);
                     const sCount = getStrokes(p.hdcp, h);
                     
                     html += `<td class="relative">
-                        <input type="number" inputmode="numeric" class="w-full h-full text-center text-lg font-bold outline-none" value="${score}" 
+                        <input type="number" inputmode="numeric" class="text-xl font-bold" value="${score}" 
                         onchange="state.rounds['${rId}']['h${h}_p${pIdx}']=parseInt(this.value); save(); renderRound('${rId}');">
-                        ${sCount > 0 ? `<span class="absolute top-0 right-0.5 text-[8px] text-red-500 font-black">${'*'.repeat(sCount)}</span>` : ''}
+                        ${sCount > 0 ? `<span class="absolute top-0 right-1 text-[10px] text-red-500 font-black">${'*'.repeat(sCount)}</span>` : ''}
                     </td>`;
-                    if(h===9) html += `<td class="subtotal-col">${out || ''}</td>`;
+                    if(h===9) html += `<td class="subtotal-col font-bold">${out || ''}</td>`;
                 }
-                html += `<td class="subtotal-col">${in9 || ''}</td><td class="subtotal-col bg-slate-50">${(out+in9) || ''}</td></tr>`;
+                html += `<td class="subtotal-col font-bold">${in9 || ''}</td><td class="subtotal-col bg-slate-50 font-black text-base">${(out+in9) || ''}</td></tr>`;
             });
 
             html += `</tbody></table></div>`;
             
-            // Match Status
             const match = getMatchStatus(rId);
-            html += `<div class="mt-8 p-6 text-center bg-white rounded-xl shadow-lg border border-slate-100">
-                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Live Match Score</p>
-                <span class="text-3xl font-black italic uppercase tracking-tighter ${match.color}">${match.text}</span>
+            html += `<div class="mt-8 p-8 text-center bg-white rounded-3xl shadow-xl border border-slate-100">
+                <span class="text-5xl font-black italic uppercase tracking-tighter ${match.color}">${match.text}</span>
             </div>`;
 
             container.innerHTML = html;
@@ -242,8 +224,8 @@
                 let bA = getNet(teams.teamA); let bB = getNet(teams.teamB);
                 if(bA < bB && bA < 900) aUp++; else if(bB < bA && bB < 900) bUp++;
             }
-            if(aUp === bUp) return { text: "All Square", color: "text-slate-900" };
-            return aUp > bUp ? { text: `Team A ${aUp - bUp} UP`, color: "text-emerald-600" } : { text: `Team B ${bUp - aUp} UP`, color: "text-blue-600" };
+            if(aUp === bUp) return { text: "AS", color: "text-slate-900" };
+            return aUp > bUp ? { text: `${aUp - bUp} UP`, color: "text-emerald-600" } : { text: `${bUp - aUp} UP`, color: "text-blue-600" };
         }
 
         function calculateNassau(rId) {
