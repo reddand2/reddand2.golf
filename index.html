@@ -70,7 +70,6 @@
     </nav>
 
     <div class="relative">
-        <!-- HOME TAB -->
         <div id="tab-home" class="tab-content active p-4 space-y-6">
             <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl mt-8">
                 <h2 class="text-[10px] font-black uppercase text-white/50 mb-6 tracking-widest text-center border-b border-white/10 pb-2">Tournament Roster</h2>
@@ -81,7 +80,6 @@
             <button onclick="resetData()" class="block mx-auto text-[10px] text-white/30 font-bold uppercase underline">Reset Everything</button>
         </div>
 
-        <!-- STANDINGS TAB -->
         <div id="tab-summary" class="tab-content pt-4 p-3">
             <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
                 <table class="w-full">
@@ -104,12 +102,12 @@
         const pars = [4,4,5,3,4,5,3,4,4, 4,3,4,5,4,4,3,4,5];
         const yards = [342, 422, 541, 165, 371, 519, 125, 386, 404, 394, 157, 372, 500, 456, 410, 196, 330, 552];
 
-        let state = JSON.parse(localStorage.getItem('golfTripV8')) || {
+        let state = JSON.parse(localStorage.getItem('golfTripV9')) || {
             players: [{ name: '', hdcp: 0, team: 'none' }],
             rounds: []
         };
 
-        function save() { localStorage.setItem('golfTripV8', JSON.stringify(state)); }
+        function save() { localStorage.setItem('golfTripV9', JSON.stringify(state)); }
 
         function init() {
             renderNav();
@@ -122,9 +120,7 @@
         function renderNav() {
             let html = `<button id="nav-home" onclick="showTab('home')" class="nav-btn">HOME</button>`;
             html += `<button id="nav-summary" onclick="showTab('summary')" class="nav-btn">STANDINGS</button>`;
-            state.rounds.forEach(r => {
-                html += `<button id="nav-r${r.id}" onclick="showTab('r${r.id}')" class="nav-btn">ROUND ${r.id}</button>`;
-            });
+            state.rounds.forEach(r => { html += `<button id="nav-r${r.id}" onclick="showTab('r${r.id}')" class="nav-btn">ROUND ${r.id}</button>`; });
             document.getElementById('nav-bar').innerHTML = html;
         }
 
@@ -143,16 +139,14 @@
 
         function cycleTeam(idx) {
             const colors = ['none', 'red', 'blue', 'white', 'grey'];
-            let curr = colors.indexOf(state.players[idx].team);
-            state.players[idx].team = colors[(curr + 1) % colors.length];
+            state.players[idx].team = colors[(colors.indexOf(state.players[idx].team) + 1) % colors.length];
             save(); renderRosterSetup(); renderStandings(); renderAllRounds();
         }
 
         function addPlayer() { state.players.push({name:'', hdcp:0, team:'none'}); save(); renderRosterSetup(); }
-
         function addRound() {
             const id = state.rounds.length + 1;
-            state.rounds.push({ id, game: 'nassau', bets: [0, 0, 0], scores: {}, wolves: {} });
+            state.rounds.push({ id, game: 'nassau', bets: [0, 0, 0], scores: {} });
             save(); init(); showTab('r' + id);
         }
 
@@ -179,16 +173,12 @@
                             <select onchange="updateRoundGame(${r.id}, this.value)" class="w-full p-2 bg-slate-50 border rounded-xl font-bold text-sm">
                                 <option value="nassau" ${r.game==='nassau'?'selected':''}>Nassau</option>
                                 <option value="stroke" ${r.game==='stroke'?'selected':''}>Stroke Play</option>
-                                <option value="ninepoint" ${r.game==='ninepoint'?'selected':''}>9-Point</option>
-                                <option value="wolf" ${r.game==='wolf'?'selected':''}>Wolf</option>
                             </select>
                         </div>
                         <div class="grid grid-cols-3 gap-1">
-                            ${r.game==='nassau' ? `
-                                <div><span class="text-[8px] font-bold">F$</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>
-                                <div><span class="text-[8px] font-bold">B$</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[1]}" oninput="updateRoundBet(${r.id},1,this.value)"></div>
-                                <div><span class="text-[8px] font-bold">T$</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[2]}" oninput="updateRoundBet(${r.id},2,this.value)"></div>
-                            ` : `<div class="col-span-3"><span class="text-[8px] font-bold">Bet Per Pt</span><input type="number" class="w-full p-2 border rounded font-bold" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>`}
+                            <div><span class="text-[8px] font-bold">F$</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>
+                            <div><span class="text-[8px] font-bold">B$</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[1]}" oninput="updateRoundBet(${r.id},1,this.value)"></div>
+                            <div><span class="text-[8px] font-bold">T$</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[2]}" oninput="updateRoundBet(${r.id},2,this.value)"></div>
                         </div>
                     </div>
                     <div id="scorecard-${r.id}"></div>
@@ -207,28 +197,26 @@
             for(let h=1; h<=18; h++) { html += `<th>${h}</th>`; if(h===9) html += `<th class="subtotal-col">OUT</th>`; }
             html += `<th class="subtotal-col">IN</th><th class="total-final-col bg-emerald-700 text-white">TOT</th></tr></thead><tbody>`;
 
-            const small = (label, data, sub) => {
-                let row = `<tr class="small-row"><td class="sticky-col text-left px-3 uppercase">${label}</td>`;
-                for(let h=1; h<=18; h++) { row += `<td>${data[h-1]}</td>`; if(h===9) row += `<td class="subtotal-col">${sub[0]}</td>`; }
-                row += `<td class="subtotal-col">${sub[1]}</td><td class="total-final-col font-bold text-xs">${sub[2]}</td></tr>`; return row;
+            const sm = (l, d, s) => {
+                let row = `<tr class="small-row"><td class="sticky-col text-left px-3 uppercase">${l}</td>`;
+                for(let h=1; h<=18; h++) { row += `<td>${d[h-1]}</td>`; if(h===9) row += `<td class="subtotal-col">${s[0]}</td>`; }
+                row += `<td class="subtotal-col">${s[1]}</td><td class="total-final-col font-bold text-xs">${s[2]}</td></tr>`; return row;
             }
-            html += small('Yards', yards, [3275, 3367, 6642]);
-            html += small('HCP Index', holeIndices, ['', '', '']);
-            html += small('Par', pars, [36, 36, 72]);
+            html += sm('Yards', yards, [3275, 3367, 6642]);
+            html += sm('HCP Index', holeIndices, ['', '', '']);
+            html += sm('Par', pars, [36, 36, 72]);
 
             state.players.forEach((p, pIdx) => {
-                let out = 0, in9 = 0;
                 html += `<tr><td class="sticky-col text-left px-3 font-black text-slate-700 team-border-${p.team}">${p.name || '...'}</td>`;
                 for(let h=1; h<=18; h++) {
                     const score = r.scores[`h${h}_p${pIdx}`] || '';
-                    if(h<=9) out += (score || 0); else in9 += (score || 0);
                     html += `<td class="relative">
-                        <input type="number" inputmode="numeric" value="${score}" oninput="state.rounds.find(x=>x.id===${rId}).scores['h${h}_p${pIdx}']=parseInt(this.value)||0;save();updateLiveMatch(${rId});">
+                        <input type="number" inputmode="numeric" value="${score}" oninput="liveUpdate(${rId}, ${pIdx}, ${h}, this.value)">
                         ${getStrokes(p.hdcp, h) > 0 ? `<span class="absolute top-0 right-1 text-[10px] text-red-500 font-black">${'*'.repeat(getStrokes(p.hdcp,h))}</span>` : ''}
                     </td>`;
-                    if(h===9) html += `<td class="subtotal-col">${out || ''}</td>`;
+                    if(h===9) html += `<td class="subtotal-col" id="out-${rId}-${pIdx}"></td>`;
                 }
-                html += `<td class="subtotal-col">${in9 || ''}</td><td class="total-final-col font-black text-xl">${(out+in9) || ''}</td></tr>`;
+                html += `<td class="subtotal-col" id="in-${rId}-${pIdx}"></td><td class="total-final-col font-black text-xl" id="tot-${rId}-${pIdx}"></td></tr>`;
             });
 
             if (r.game === 'nassau') {
@@ -237,45 +225,58 @@
             }
             html += `</tbody></table></div>`;
             container.innerHTML = html;
-            if(r.game === 'nassau') updateLiveMatch(rId);
+            state.players.forEach((p, i) => updateTotals(rId, i));
+            if(r.game === 'nassau') updateMatch(rId);
         }
 
-        function updateLiveMatch(rId) {
+        function liveUpdate(rId, pIdx, h, val) {
+            state.rounds.find(x => x.id === rId).scores[`h${h}_p${pIdx}`] = parseInt(val) || 0;
+            save();
+            updateTotals(rId, pIdx);
+            updateMatch(rId);
+        }
+
+        function updateTotals(rId, pIdx) {
+            const r = state.rounds.find(x => x.id === rId);
+            let out = 0, in9 = 0;
+            for(let h=1; h<=9; h++) out += (r.scores[`h${h}_p${pIdx}`] || 0);
+            for(let h=10; h<=18; h++) in9 += (r.scores[`h${h}_p${pIdx}`] || 0);
+            
+            const outEl = document.getElementById(`out-${rId}-${pIdx}`);
+            const inEl = document.getElementById(`in-${rId}-${pIdx}`);
+            const totEl = document.getElementById(`tot-${rId}-${pIdx}`);
+            
+            if(outEl) outEl.innerText = out || '';
+            if(inEl) inEl.innerText = in9 || '';
+            if(totEl) totEl.innerText = (out + in9) || '';
+        }
+
+        function updateMatch(rId) {
             const r = state.rounds.find(x => x.id === rId);
             const sideRow = document.getElementById(`row-side-${rId}`);
             const overRow = document.getElementById(`row-overall-${rId}`);
             if(!sideRow || !overRow) return;
 
-            let rFrontWins = 0, bFrontWins = 0, rBackWins = 0, bBackWins = 0;
-            let sideHtml = `<td class="sticky-col text-left px-3 uppercase text-xs font-black">Side</td>`;
-            let overHtml = `<td class="sticky-col text-left px-3 uppercase text-xs font-black">Overall</td>`;
+            let rF=0, bF=0, rB=0, bB=0;
+            let sHtml = `<td class="sticky-col text-left px-3 uppercase text-xs font-black">Side</td>`;
+            let oHtml = `<td class="sticky-col text-left px-3 uppercase text-xs font-black">Overall</td>`;
 
             for(let h=1; h<=18; h++) {
-                const getNet = (c) => {
-                    let s = state.players.map((p,i)=>(p.team===c && r.scores[`h${h}_p${i}`])?r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h):999);
-                    return Math.min(...s);
-                };
+                const getNet = (c) => Math.min(...state.players.map((p,i)=>(p.team===c && r.scores[`h${h}_p${i}`])?r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h):999));
                 let red = getNet('red'), blue = getNet('blue');
-                
                 if(red < 900 && blue < 900) {
-                    if (red < blue) { if(h<=9) rFrontWins++; else rBackWins++; }
-                    else if (blue < red) { if(h<=9) bFrontWins++; else bBackWins++; }
+                    if (red < blue) { if(h<=9) rF++; else rB++; }
+                    else if (blue < red) { if(h<=9) bF++; else bB++; }
                 }
-
-                const getMatchStatus = (rW, bW) => {
-                    if (rW === bW) return {v:'AS',c:'text-as'};
-                    return rW > bW ? {v: (rW-bW) + ' ↑', c:'text-red-lead'} : {v: (bW-rW) + ' ↑', c:'text-blue-lead'};
-                };
-
-                const s = h<=9 ? getMatchStatus(rFrontWins, bFrontWins) : getMatchStatus(rBackWins, bBackWins);
-                const o = getMatchStatus(rFrontWins + rBackWins, bFrontWins + bBackWins);
-
-                sideHtml += `<td class="${s.c}">${s.v}</td>`;
-                overHtml += `<td class="${o.c}">${o.v}</td>`;
-                if(h===9) { sideHtml += `<td class="subtotal-col"></td>`; overHtml += `<td class="subtotal-col"></td>`; }
+                const fmt = (rW, bW) => rW === bW ? {v:'AS',c:'text-as'} : (rW > bW ? {v:(rW-bW)+' ↑',c:'text-red-lead'} : {v:(bW-rW)+' ↑',c:'text-blue-lead'});
+                const s = h<=9 ? fmt(rF, bF) : fmt(rB, bB);
+                const o = fmt(rF + rB, bF + bB);
+                sHtml += `<td class="${s.c}">${s.v}</td>`;
+                oHtml += `<td class="${o.c}">${o.v}</td>`;
+                if(h===9) { sHtml += `<td class="subtotal-col"></td>`; oHtml += `<td class="subtotal-col"></td>`; }
             }
-            sideRow.innerHTML = sideHtml + `<td></td><td></td>`;
-            overRow.innerHTML = overHtml + `<td></td><td></td>`;
+            sideRow.innerHTML = sHtml + `<td></td><td></td>`;
+            overRow.innerHTML = oHtml + `<td></td><td></td>`;
         }
 
         function renderStandings() {
@@ -284,14 +285,11 @@
                 if(r.game === 'nassau') {
                     let rF=0, bF=0, rB=0, bB=0;
                     for(let h=1; h<=18; h++) {
-                        const getNet = (c) => Math.min(...state.players.map((p,i)=>(p.team===c&&r.scores[`h${h}_p${i}`])?r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h):999));
-                        let nr=getNet('red'), nb=getNet('blue');
-                        if(nr<900 && nb<900) {
-                            if (nr < nb) { if(h<=9) rF++; else rB++; }
-                            else if (nb < nr) { if(h<=9) bF++; else bB++; }
-                        }
+                        const net = (c) => Math.min(...state.players.map((p,i)=>(p.team===c&&r.scores[`h${h}_p${i}`])?r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h):999));
+                        let nr=net('red'), nb=net('blue');
+                        if(nr<900 && nb<900) { if (nr < nb) { if(h<=9) rF++; else rB++; } else if (nb < nr) { if(h<=9) bF++; else bB++; } }
                     }
-                    let rw=0; 
+                    let rw=0;
                     if(rF > bF) rw += r.bets[0]; else if(bF > rF) rw -= r.bets[0];
                     if(rB > bB) rw += r.bets[1]; else if(bB > rB) rw -= r.bets[1];
                     if((rF + rB) > (bF + bB)) rw += r.bets[2]; else if((bF + bB) > (rF + rB)) rw -= r.bets[2];
@@ -307,7 +305,7 @@
         function updateRoundGame(id, val) { state.rounds.find(x=>x.id===id).game=val; save(); renderAllRounds(); showTab('r'+id); }
         function updateRoundBet(id, idx, val) { state.rounds.find(x=>x.id===id).bets[idx]=parseInt(val)||0; save(); renderStandings(); }
         function getStrokes(hdcp, hIdx) { let s=0; let t=hdcp; while(t>0){if(t>=holeIndices[hIdx-1])s++; t-=18;} return s; }
-        function resetData() { if(confirm("Wipe Trip?")) { localStorage.removeItem('golfTripV8'); location.reload(); } }
+        function resetData() { if(confirm("Wipe everything?")) { localStorage.removeItem('golfTripV9'); location.reload(); } }
 
         init();
     </script>
