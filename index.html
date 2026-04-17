@@ -23,10 +23,30 @@
         input { background: transparent; outline: none; width: 100%; height: 100%; text-align: center; font-weight: inherit; font-size: 20px; }
         .name-input { text-align: left; padding-left: 12px; font-weight: 800; font-size: 18px; }
         .nav-btn { font-size: 16px; letter-spacing: 0.025em; font-weight: 900; padding: 12px 4px; }
-        .team-red { border-left: 12px solid #ef4444 !important; }
-        .team-blue { border-left: 12px solid #3b82f6 !important; }
-        .team-white { border-left: 12px solid #e2e8f0 !important; }
-        .team-grey { border-left: 12px solid #64748b !important; }
+        
+        /* Team Selection Styling */
+        .team-select-cell { position: relative; padding: 0 !important; cursor: pointer; transition: background 0.3s; }
+        .team-select-cell select { 
+            appearance: none; -webkit-appearance: none;
+            width: 100%; height: 100%; border: none; background: transparent; 
+            cursor: pointer; text-indent: -9999px; /* Hides text */
+        }
+        .team-select-cell::after {
+            content: '▼'; position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            font-size: 10px; color: #94a3b8; pointer-events: none;
+        }
+        .bg-red { background-color: #ef4444 !important; }
+        .bg-blue { background-color: #3b82f6 !important; }
+        .bg-white { background-color: #ffffff !important; }
+        .bg-grey { background-color: #94a3b8 !important; }
+        .bg-none { background-color: #f8fafc !important; }
+        
+        /* Sticky Column Team Borders */
+        .team-border-red { border-left: 12px solid #ef4444 !important; }
+        .team-border-blue { border-left: 12px solid #3b82f6 !important; }
+        .team-border-white { border-left: 12px solid #e2e8f0 !important; }
+        .team-border-grey { border-left: 12px solid #64748b !important; }
+        .team-border-none { border-left: 12px solid #f1f5f9 !important; }
     </style>
 </head>
 <body class="pb-20 text-slate-900">
@@ -48,13 +68,12 @@
     </nav>
 
     <div class="p-3">
-        <!-- STANDINGS -->
         <div id="summary" class="tab-content active pt-4">
             <div class="max-w-[100%] mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
                 <table class="w-full">
                     <thead>
                         <tr class="bg-slate-900 text-white text-[12px] uppercase">
-                            <th class="p-4 text-left w-16">Team</th>
+                            <th class="p-4 text-left w-14">Team</th>
                             <th class="text-left">Player Name</th>
                             <th class="w-20">HCP</th>
                             <th class="bg-emerald-700">Earnings</th>
@@ -62,7 +81,7 @@
                     </thead>
                     <tbody id="roster-body"></tbody>
                 </table>
-                <div class="p-4 bg-slate-50 border-t">
+                <div class="p-4 bg-slate-50 border-t text-center">
                     <button onclick="addPlayer()" class="w-full py-4 bg-emerald-600 text-white font-black rounded-xl uppercase text-base tracking-widest shadow-md active:bg-emerald-700">+ Add Player</button>
                 </div>
             </div>
@@ -79,15 +98,16 @@
         const pars = [4,4,5,3,4,5,3,4,4, 4,3,4,5,4,4,3,4,5];
         const yards = [342, 422, 541, 165, 371, 519, 125, 386, 404, 394, 157, 372, 500, 456, 410, 196, 330, 552];
 
+        // START WITH ONE PLAYER
         let state = JSON.parse(localStorage.getItem('golfTripData')) || {
-            players: [{ name: '', hdcp: 0, team: 'red' }, { name: '', hdcp: 0, team: 'blue' }],
+            players: [{ name: '', hdcp: 0, team: 'none' }],
             rounds: { r1: {}, r2: {}, r3: {} }
         };
 
         function save() { localStorage.setItem('golfTripData', JSON.stringify(state)); }
 
         function addPlayer() {
-            state.players.push({ name: '', hdcp: 0, team: 'white' });
+            state.players.push({ name: '', hdcp: 0, team: 'none' });
             save();
             renderSummary();
         }
@@ -126,16 +146,20 @@
             
             document.getElementById('roster-body').innerHTML = state.players.map((p, i) => {
                 const earnings = p.team === 'red' ? netRed : (p.team === 'blue' ? -netRed : 0);
+                const bgClass = `bg-${p.team}`;
+                const borderClass = `team-border-${p.team}`;
+
                 return `<tr class="border-b">
-                    <td class="p-2">
-                        <select onchange="state.players[${i}].team=this.value; save(); renderSummary();" class="w-full p-2 rounded border text-[11px] uppercase font-black bg-white">
+                    <td class="team-select-cell ${bgClass}">
+                        <select onchange="state.players[${i}].team=this.value; save(); renderSummary();">
+                            <option value="none" ${p.team==='none'?'selected':''}>-</option>
                             <option value="red" ${p.team==='red'?'selected':''}>Red</option>
                             <option value="blue" ${p.team==='blue'?'selected':''}>Blue</option>
                             <option value="white" ${p.team==='white'?'selected':''}>White</option>
                             <option value="grey" ${p.team==='grey'?'selected':''}>Grey</option>
                         </select>
                     </td>
-                    <td class="text-left sticky-col team-${p.team}">
+                    <td class="text-left sticky-col ${borderClass}">
                         <input type="text" class="name-input" placeholder="Enter Name" value="${p.name}" oninput="state.players[${i}].name=this.value; save();">
                     </td>
                     <td>
@@ -176,7 +200,8 @@
 
             state.players.forEach((p, pIdx) => {
                 let out = 0, in9 = 0;
-                html += `<tr><td class="sticky-col text-left px-3 font-black text-slate-700 team-${p.team}">${p.name || '...'}</td>`;
+                const borderClass = `team-border-${p.team}`;
+                html += `<tr><td class="sticky-col text-left px-3 font-black text-slate-700 ${borderClass}">${p.name || '...'}</td>`;
                 for(let h=1; h<=18; h++) {
                     const score = state.rounds[rId][`h${h}_p${pIdx}`] || '';
                     if(h<=9) out += (score || 0); else in9 += (score || 0);
@@ -193,7 +218,6 @@
 
             const matchStatus = calculateHoleByHoleMatch(rId);
             
-            // Match Status Logic Display
             const renderMatchRow = (title, dataArr, colorClass) => {
                 let row = `<tr class="match-row ${colorClass}"><td class="sticky-col text-left px-3 italic uppercase">${title}</td>`;
                 for(let h=1; h<=18; h++) {
