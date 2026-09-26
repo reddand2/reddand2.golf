@@ -54,6 +54,14 @@
         .team-border-blue { border-left: 14px solid #3b82f6 !important; }
         .team-border-white { border-left: 14px solid #e2e8f0 !important; }
         .team-border-grey { border-left: 14px solid #64748b !important; }
+
+        /* Banker game */
+        .bk-divider td { height: 10px !important; background: #1e293b; border-color: #1e293b; }
+        .bk-cell { position: relative; cursor: pointer; }
+        .bk-select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px; }
+        .bk-banker-hole { background: #fffbeb !important; }
+        .bk-money-row td { height: 58px; }
+        .sheet-input { height: auto !important; width: 100% !important; font-size: 18px !important; }
     </style>
 </head>
 <body class="pb-20">
@@ -72,11 +80,15 @@
     <div class="relative">
         <div id="tab-home" class="tab-content active p-4 space-y-6">
             <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl mt-8">
+                <h2 class="text-[10px] font-black uppercase text-white/50 mb-4 tracking-widest text-center border-b border-white/10 pb-2">Course</h2>
+                <div id="course-setup"></div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl">
                 <h2 class="text-[10px] font-black uppercase text-white/50 mb-6 tracking-widest text-center border-b border-white/10 pb-2">Tournament Roster</h2>
                 <div id="roster-setup" class="space-y-5"></div>
                 <button onclick="addPlayer()" class="w-full mt-6 py-4 bg-white/5 text-white/70 font-black rounded-xl uppercase text-[10px] tracking-widest border border-white/10">+ Add Player</button>
             </div>
-            <button onclick="addRound()" class="w-full py-6 bg-emerald-500 text-white font-black rounded-3xl uppercase tracking-widest shadow-2xl text-lg">Start Next Round</button>
+            <button id="start-btn" onclick="addRound()" class="w-full py-6 bg-emerald-500 text-white font-black rounded-3xl uppercase tracking-widest shadow-2xl text-lg">Start Round</button>
             <button onclick="resetData()" class="block mx-auto text-[10px] text-white/30 font-bold uppercase underline">Reset Everything</button>
         </div>
 
@@ -97,30 +109,94 @@
         <div id="rounds-container"></div>
     </div>
 
+    <!-- Pop-up used for the Banker hole sheet and tie-breakers -->
+    <div id="modal" class="fixed inset-0 z-[100] hidden items-end sm:items-center justify-center bg-black/60" onclick="if(event.target===this) closeModal()">
+        <div id="modal-body" class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[88vh] overflow-y-auto shadow-2xl"></div>
+    </div>
+
     <script>
-        const holeIndices = [15, 1, 3, 13, 9, 7, 17, 11, 5, 12, 14, 4, 8, 2, 10, 16, 18, 6];
-        const pars = [4,4,5,3,4,5,3,4,4, 4,3,4,5,4,4,3,4,5];
-        const yards = [342, 422, 541, 165, 371, 519, 125, 386, 404, 394, 157, 372, 500, 456, 410, 196, 330, 552];
+        const COURSES = {
+            original: {
+                name: 'Original Course', tee: '', rating: null, slope: null,
+                yards: [342,422,541,165,371,519,125,386,404, 394,157,372,500,456,410,196,330,552],
+                pars:  [4,4,5,3,4,5,3,4,4, 4,3,4,5,4,4,3,4,5],
+                hcp:   [15,1,3,13,9,7,17,11,5, 12,14,4,8,2,10,16,18,6]
+            },
+            islandview: {
+                name: 'Island View Golf Club', tee: 'Black', rating: 71.7, slope: 135,
+                yards: [480,386,550,158,385,191,399,374,398, 402,208,319,355,567,337,148,543,411],
+                pars:  [5,4,5,3,4,3,4,4,4, 4,3,4,4,5,4,3,5,4],
+                hcp:   [15,7,1,17,11,9,3,13,5, 6,16,14,10,2,12,18,4,8]
+            },
+            hazeltine: {
+                name: 'Hazeltine National Golf Club', tee: 'Gold', rating: 73.2, slope: 137,
+                yards: [412,384,560,186,400,368,512,144,389, 404,550,420,174,328,538,352,156,406],
+                pars:  [4,4,5,3,4,4,5,3,4, 4,5,4,3,4,5,4,3,4],
+                hcp:   [5,9,11,15,1,3,13,17,7, 8,12,2,16,18,6,10,14,4]
+            },
+            northland: {
+                name: 'Northland Country Club', tee: 'White', rating: 71.7, slope: 135,
+                yards: [418,313,365,471,127,367,410,206,544, 391,471,176,415,410,385,408,150,412],
+                pars:  [4,4,4,5,3,4,4,3,5, 4,5,3,4,4,4,4,3,4],
+                hcp:   [5,15,3,11,17,9,1,13,7, 2,12,16,10,6,14,8,18,4]
+            }
+        };
+        // Active course data (every game reads these)
+        let holeIndices, pars, yards;
+        function applyCourse() {
+            const c = COURSES[state.course] || COURSES.original;
+            holeIndices = c.hcp; pars = c.pars; yards = c.yards;
+        }
+        const sum = (a, from, to) => a.slice(from, to).reduce((x, y) => x + y, 0);
 
         let state = JSON.parse(localStorage.getItem('golfTripV9')) || {
             players: [{ name: '', hdcp: 0, team: 'none' }],
             rounds: []
         };
 
+        // Older saves may hold several rounds; keep only the first one.
+        if (state.rounds.length > 1) state.rounds = [state.rounds[0]];
+        // Each round can run several games at once.
+        state.rounds.forEach(r => {
+            if (!r.games) r.games = { nassau: r.game === 'nassau', stroke: r.game === 'stroke', banker: r.game === 'banker' };
+            if (!r.bets) r.bets = [0, 0, 0];
+        });
+        function gameOn(r, g) { return !!(r && r.games && r.games[g]); }
+
+        if (!state.course || !COURSES[state.course]) state.course = 'original';
+        applyCourse();
+
         function save() { localStorage.setItem('golfTripV9', JSON.stringify(state)); }
+
+        function renderCourseSetup() {
+            const c = COURSES[state.course];
+            document.getElementById('course-setup').innerHTML = `
+                <select onchange="selectCourse(this.value)" class="w-full p-4 bg-white/10 border border-white/20 rounded-xl font-black text-white text-lg" style="font-size:18px">
+                    ${Object.entries(COURSES).map(([k, v]) => `<option value="${k}" class="text-slate-900" ${state.course === k ? 'selected' : ''}>${v.name}${v.tee ? ' (' + v.tee + ')' : ''}</option>`).join('')}
+                </select>
+                <div class="mt-3 text-center text-white/60 text-xs font-bold">
+                    Par ${sum(c.pars,0,18)}, ${sum(c.yards,0,18)} yards${c.rating ? `, rating ${c.rating}, slope ${c.slope}` : ''}
+                </div>`;
+        }
+        function selectCourse(key) {
+            state.course = key; save(); applyCourse();
+            renderCourseSetup(); renderAllRounds(); renderStandings();
+        }
 
         function init() {
             renderNav();
+            renderCourseSetup();
             renderRosterSetup();
             renderStandings();
             renderAllRounds();
+            updateStartButton();
             showTab('home');
         }
 
         function renderNav() {
             let html = `<button id="nav-home" onclick="showTab('home')" class="nav-btn">HOME</button>`;
             html += `<button id="nav-summary" onclick="showTab('summary')" class="nav-btn">STANDINGS</button>`;
-            state.rounds.forEach(r => { html += `<button id="nav-r${r.id}" onclick="showTab('r${r.id}')" class="nav-btn">ROUND ${r.id}</button>`; });
+            state.rounds.forEach(r => { html += `<button id="nav-r${r.id}" onclick="showTab('r${r.id}')" class="nav-btn">SCORECARD</button>`; });
             document.getElementById('nav-bar').innerHTML = html;
         }
 
@@ -128,7 +204,7 @@
             document.getElementById('roster-setup').innerHTML = state.players.map((p, i) => `
                 <div class="flex items-center space-x-4">
                     <div onclick="cycleTeam(${i})" class="team-dot bg-${p.team}">${p.team === 'none' ? '?' : ''}</div>
-                    <input type="text" class="text-left font-black w-full text-xl text-white placeholder-white/20" placeholder="Name" value="${p.name}" oninput="state.players[${i}].name=this.value;save();">
+                    <input type="text" class="text-left font-black w-full text-xl text-white placeholder-white/20" placeholder="Name" value="${esc(p.name)}" oninput="state.players[${i}].name=this.value;save();">
                     <div class="flex flex-col items-center">
                         <span class="text-[8px] text-white/40 font-black uppercase tracking-tighter">HCP</span>
                         <input type="number" class="w-16 bg-white/10 border border-white/10 rounded-xl p-2 text-center font-bold text-white text-lg" value="${p.hdcp}" oninput="state.players[${i}].hdcp=parseInt(this.value)||0;save();">
@@ -144,10 +220,17 @@
         }
 
         function addPlayer() { state.players.push({name:'', hdcp:0, team:'none'}); save(); renderRosterSetup(); }
+        // Single round only: create it the first time, otherwise just open it.
         function addRound() {
-            const id = state.rounds.length + 1;
-            state.rounds.push({ id, game: 'nassau', bets: [0, 0, 0], scores: {} });
-            save(); init(); showTab('r' + id);
+            if (state.rounds.length === 0) {
+                state.rounds.push({ id: 1, games: { nassau: true, stroke: true, banker: false }, bets: [0, 0, 0], scores: {} });
+                save(); init();
+            }
+            showTab('r' + state.rounds[0].id);
+        }
+        function updateStartButton() {
+            const b = document.getElementById('start-btn');
+            if (b) b.innerText = state.rounds.length ? 'Go to Scorecard' : 'Start Round';
         }
 
         function showTab(tabId) {
@@ -160,28 +243,34 @@
             const header = document.getElementById('main-header');
             const title = document.getElementById('header-title');
             if (tabId === 'home') header.style.display = 'none';
-            else { header.style.display = 'block'; title.innerText = (tabId === 'summary') ? "Live Leaderboard" : ("Round " + tabId.replace('r','')); }
+            else { header.style.display = 'block'; title.innerText = (tabId === 'summary') ? "Live Leaderboard" : COURSES[state.course].name; }
         }
 
         function renderAllRounds() {
             const container = document.getElementById('rounds-container');
             container.innerHTML = state.rounds.map(r => `
                 <div id="tab-r${r.id}" class="tab-content pt-4 space-y-4 p-3">
-                    <div class="bg-white p-5 rounded-3xl shadow border border-slate-200 grid grid-cols-2 gap-4 text-center">
+                    <div class="bg-white p-5 rounded-3xl shadow border border-slate-200 space-y-4">
                         <div>
-                            <label class="text-[9px] uppercase font-black text-slate-400">Game Type</label>
-                            <select onchange="updateRoundGame(${r.id}, this.value)" class="w-full p-2 bg-slate-50 border rounded-xl font-bold text-sm">
-                                <option value="nassau" ${r.game==='nassau'?'selected':''}>Nassau</option>
-                                <option value="stroke" ${r.game==='stroke'?'selected':''}>Stroke Play</option>
-                            </select>
+                            <div class="text-[9px] uppercase font-black text-slate-400 mb-2">Games (tap to turn on or off)</div>
+                            <div class="grid grid-cols-3 gap-2">
+                                ${[['nassau','Nassau'],['stroke','Stroke Play'],['banker','Banker']].map(([g,label]) => `
+                                    <button onclick="toggleGame(${r.id},'${g}')" class="py-3 rounded-xl font-black text-sm ${gameOn(r,g) ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'}">${gameOn(r,g) ? '✓ ' : ''}${label}</button>`).join('')}
+                            </div>
                         </div>
-                        <div class="grid grid-cols-3 gap-1">
-                            <div><span class="text-[8px] font-bold">F$</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>
-                            <div><span class="text-[8px] font-bold">B$</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[1]}" oninput="updateRoundBet(${r.id},1,this.value)"></div>
-                            <div><span class="text-[8px] font-bold">T$</span><input type="number" class="w-full p-1 border rounded text-xs" value="${r.bets[2]}" oninput="updateRoundBet(${r.id},2,this.value)"></div>
-                        </div>
+                        ${gameOn(r,'nassau') ? `
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div><span class="text-[9px] font-black uppercase text-slate-400">Front $</span><input type="number" class="w-full p-2 border rounded-lg text-base" style="height:auto" value="${r.bets[0]}" oninput="updateRoundBet(${r.id},0,this.value)"></div>
+                            <div><span class="text-[9px] font-black uppercase text-slate-400">Back $</span><input type="number" class="w-full p-2 border rounded-lg text-base" style="height:auto" value="${r.bets[1]}" oninput="updateRoundBet(${r.id},1,this.value)"></div>
+                            <div><span class="text-[9px] font-black uppercase text-slate-400">Total $</span><input type="number" class="w-full p-2 border rounded-lg text-base" style="height:auto" value="${r.bets[2]}" oninput="updateRoundBet(${r.id},2,this.value)"></div>
+                        </div>` : ''}
+                        ${gameOn(r,'banker') ? `
+                        <div class="text-[11px] font-bold text-slate-500 leading-snug">Banker: pick each hole's banker in the Banker row, then tap Bets to enter bets and doubles.</div>` : ''}
                     </div>
                     <div id="scorecard-${r.id}"></div>
+                    <div id="nassau-${r.id}"></div>
+                    <div id="stroke-${r.id}"></div>
+                    <div id="settle-${r.id}"></div>
                 </div>
             `).join('');
             state.rounds.forEach(r => renderScorecard(r.id));
@@ -202,12 +291,12 @@
                 for(let h=1; h<=18; h++) { row += `<td>${d[h-1]}</td>`; if(h===9) row += `<td class="subtotal-col">${s[0]}</td>`; }
                 row += `<td class="subtotal-col">${s[1]}</td><td class="total-final-col font-bold text-xs">${s[2]}</td></tr>`; return row;
             }
-            html += sm('Yards', yards, [3275, 3367, 6642]);
+            html += sm('Yards', yards, [sum(yards,0,9), sum(yards,9,18), sum(yards,0,18)]);
             html += sm('HCP Index', holeIndices, ['', '', '']);
-            html += sm('Par', pars, [36, 36, 72]);
+            html += sm('Par', pars, [sum(pars,0,9), sum(pars,9,18), sum(pars,0,18)]);
 
             state.players.forEach((p, pIdx) => {
-                html += `<tr><td class="sticky-col text-left px-3 font-black text-slate-700 team-border-${p.team}">${p.name || '...'}</td>`;
+                html += `<tr><td class="sticky-col text-left px-3 font-black text-slate-700 team-border-${p.team}">${esc(p.name) || '...'}</td>`;
                 for(let h=1; h<=18; h++) {
                     const score = r.scores[`h${h}_p${pIdx}`] || '';
                     html += `<td class="relative">
@@ -219,21 +308,32 @@
                 html += `<td class="subtotal-col" id="in-${rId}-${pIdx}"></td><td class="total-final-col font-black text-xl" id="tot-${rId}-${pIdx}"></td></tr>`;
             });
 
-            if (r.game === 'nassau') {
+            if (gameOn(r, 'nassau')) {
                 html += `<tr class="match-row" id="row-side-${rId}"><td class="sticky-col text-left px-3 uppercase text-xs font-black">Side</td></tr>`;
                 html += `<tr class="match-row border-t-2" id="row-overall-${rId}"><td class="sticky-col text-left px-3 uppercase text-xs font-black">Overall</td></tr>`;
+            }
+            if (gameOn(r, 'banker')) {
+                html += `<tr class="bk-divider"><td class="sticky-col" style="background:#1e293b"></td><td colspan="21"></td></tr>`;
+                html += `<tr id="row-bk-banker-${rId}"><td class="sticky-col text-left px-3 uppercase text-xs font-black text-amber-600">Banker</td></tr>`;
+                html += `<tr id="row-bk-bets-${rId}"><td class="sticky-col text-left px-3 uppercase text-xs font-black text-slate-500">Bets</td></tr>`;
+                state.players.forEach((p, i) => {
+                    html += `<tr class="bk-money-row" id="row-bk-m-${rId}-${i}"><td class="sticky-col"></td></tr>`;
+                });
             }
             html += `</tbody></table></div>`;
             container.innerHTML = html;
             state.players.forEach((p, i) => updateTotals(rId, i));
-            if(r.game === 'nassau') updateMatch(rId);
+            refreshGames(rId);
         }
 
         function liveUpdate(rId, pIdx, h, val) {
-            state.rounds.find(x => x.id === rId).scores[`h${h}_p${pIdx}`] = parseInt(val) || 0;
+            const r = state.rounds.find(x => x.id === rId);
+            r.scores[`h${h}_p${pIdx}`] = parseInt(val) || 0;
             save();
             updateTotals(rId, pIdx);
-            updateMatch(rId);
+            refreshGames(rId);
+            if (gameOn(r, 'banker')) scheduleTieCheck(rId);
+            renderStandings();
         }
 
         function updateTotals(rId, pIdx) {
@@ -248,7 +348,66 @@
             
             if(outEl) outEl.innerText = out || '';
             if(inEl) inEl.innerText = in9 || '';
-            if(totEl) totEl.innerText = (out + in9) || '';
+            if(totEl) {
+                let net = 0, played = 0;
+                for(let h=1; h<=18; h++) { const g = r.scores[`h${h}_p${pIdx}`] || 0; if(g) { net += g - getStrokes(state.players[pIdx].hdcp, h); played++; } }
+                totEl.innerHTML = played ? `<div>${out + in9}</div><div class="text-[10px] font-bold text-slate-400">net ${net}</div>` : '';
+            }
+        }
+
+        function refreshGames(rId) {
+            const r = getRound(rId);
+            updateMatch(rId);
+            const nEl = document.getElementById('nassau-' + rId); if (nEl && !gameOn(r,'nassau')) nEl.innerHTML = '';
+            const sEl = document.getElementById('stroke-' + rId); if (sEl && !gameOn(r,'stroke')) sEl.innerHTML = '';
+            const bEl = document.getElementById('settle-' + rId); if (bEl && !gameOn(r,'banker')) bEl.innerHTML = '';
+            if (gameOn(r, 'nassau')) renderNassauCard(rId);
+            if (gameOn(r, 'stroke')) renderStrokeCard(rId);
+            if (gameOn(r, 'banker')) updateBanker(rId);
+        }
+
+        /* ---------- NASSAU (red vs blue, best net ball, match play) ---------- */
+        function nassauTeams() {
+            return {
+                red: state.players.map((p,i)=>p.team==='red'?i:-1).filter(i=>i>=0),
+                blue: state.players.map((p,i)=>p.team==='blue'?i:-1).filter(i=>i>=0)
+            };
+        }
+        function computeNassau(r) {
+            const t = nassauTeams();
+            const res = { ready: t.red.length > 0 && t.blue.length > 0, holes: [], segs: {} };
+            const bestNet = (team, h) => Math.min(...team.map(i => (r.scores[`h${h}_p${i}`]||0) - getStrokes(state.players[i].hdcp, h)));
+            let rF=0,bF=0,rB=0,bB=0,playedF=0,playedB=0;
+            for (let h = 1; h <= 18; h++) {
+                // A hole only counts once every red and blue player has a score on it
+                const done = res.ready && [...t.red, ...t.blue].every(i => (r.scores[`h${h}_p${i}`]||0) > 0);
+                let win = null;
+                if (done) {
+                    const nr = bestNet(t.red, h), nb = bestNet(t.blue, h);
+                    win = nr < nb ? 'red' : (nb < nr ? 'blue' : 'halve');
+                    if (h <= 9) { playedF++; if (win==='red') rF++; if (win==='blue') bF++; }
+                    else        { playedB++; if (win==='red') rB++; if (win==='blue') bB++; }
+                }
+                res.holes[h] = { done, win, rF, bF, rB, bB };
+            }
+            const seg = (rw, bw, played, total, bet) => {
+                const left = total - played, lead = Math.abs(rw - bw);
+                const leader = rw > bw ? 'red' : (bw > rw ? 'blue' : null);
+                const decided = played > 0 && (left === 0 || lead > left);
+                return { rw, bw, played, left, lead, leader, decided, winner: decided ? leader : null, bet: bet || 0 };
+            };
+            res.segs.front = seg(rF, bF, playedF, 9, r.bets[0]);
+            res.segs.back = seg(rB, bB, playedB, 9, r.bets[1]);
+            res.segs.overall = seg(rF+rB, bF+bB, playedF+playedB, 18, r.bets[2]);
+            // Money only for decided bets (closed out, or all holes played)
+            res.money = Array(state.players.length).fill(0);
+            Object.values(res.segs).forEach(sg => {
+                if (!sg.winner || !sg.bet) return;
+                const w = sg.winner === 'red' ? t.red : t.blue, l = sg.winner === 'red' ? t.blue : t.red;
+                w.forEach(i => res.money[i] += sg.bet);
+                l.forEach(i => res.money[i] -= sg.bet);
+            });
+            return res;
         }
 
         function updateMatch(rId) {
@@ -256,56 +415,514 @@
             const sideRow = document.getElementById(`row-side-${rId}`);
             const overRow = document.getElementById(`row-overall-${rId}`);
             if(!sideRow || !overRow) return;
+            const res = computeNassau(r);
 
-            let rF=0, bF=0, rB=0, bB=0;
             let sHtml = `<td class="sticky-col text-left px-3 uppercase text-xs font-black">Side</td>`;
             let oHtml = `<td class="sticky-col text-left px-3 uppercase text-xs font-black">Overall</td>`;
-
+            const fmt = (rW, bW) => rW === bW ? {v:'AS',c:'text-as'} : (rW > bW ? {v:(rW-bW)+' ↑',c:'text-red-lead'} : {v:(bW-rW)+' ↑',c:'text-blue-lead'});
             for(let h=1; h<=18; h++) {
-                const getNet = (c) => Math.min(...state.players.map((p,i)=>(p.team===c && r.scores[`h${h}_p${i}`])?r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h):999));
-                let red = getNet('red'), blue = getNet('blue');
-                if(red < 900 && blue < 900) {
-                    if (red < blue) { if(h<=9) rF++; else rB++; }
-                    else if (blue < red) { if(h<=9) bF++; else bB++; }
-                }
-                const fmt = (rW, bW) => rW === bW ? {v:'AS',c:'text-as'} : (rW > bW ? {v:(rW-bW)+' ↑',c:'text-red-lead'} : {v:(bW-rW)+' ↑',c:'text-blue-lead'});
-                const s = h<=9 ? fmt(rF, bF) : fmt(rB, bB);
-                const o = fmt(rF + rB, bF + bB);
-                sHtml += `<td class="${s.c}">${s.v}</td>`;
-                oHtml += `<td class="${o.c}">${o.v}</td>`;
+                const x = res.holes[h];
+                if (x.done) {
+                    const sd = h<=9 ? fmt(x.rF, x.bF) : fmt(x.rB, x.bB);
+                    const o = fmt(x.rF + x.rB, x.bF + x.bB);
+                    sHtml += `<td class="${sd.c}">${sd.v}</td>`;
+                    oHtml += `<td class="${o.c}">${o.v}</td>`;
+                } else { sHtml += `<td></td>`; oHtml += `<td></td>`; }
                 if(h===9) { sHtml += `<td class="subtotal-col"></td>`; oHtml += `<td class="subtotal-col"></td>`; }
             }
-            sideRow.innerHTML = sHtml + `<td></td><td></td>`;
-            overRow.innerHTML = oHtml + `<td></td><td></td>`;
+            sideRow.innerHTML = sHtml + `<td class="subtotal-col"></td><td class="total-final-col"></td>`;
+            overRow.innerHTML = oHtml + `<td class="subtotal-col"></td><td class="total-final-col"></td>`;
+        }
+
+        function renderNassauCard(rId) {
+            const el = document.getElementById('nassau-' + rId);
+            if (!el) return;
+            const r = getRound(rId);
+            const res = computeNassau(r);
+            if (!res.ready) {
+                el.innerHTML = `<div class="bg-white p-5 rounded-3xl shadow border border-slate-200">
+                    <div class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Nassau</div>
+                    <div class="text-sm font-bold text-amber-600">Nassau needs a red team and a blue team. On Home, tap the square next to each name to set their team.</div></div>`;
+                return;
+            }
+            const teamName = t => t === 'red' ? '<span style="color:#ef4444">Red</span>' : '<span style="color:#3b82f6">Blue</span>';
+            const line = (label, sg) => {
+                let status;
+                if (sg.played === 0) status = '<span class="text-slate-400">Not started</span>';
+                else if (sg.decided && !sg.winner) status = 'Halved, no money';
+                else if (sg.decided) status = `${teamName(sg.winner)} wins${sg.left > 0 ? ` ${sg.lead}&amp;${sg.left}` : ''}${sg.bet ? `, $${sg.bet} each` : ''}`;
+                else if (!sg.leader) status = `All square, ${sg.left} to play`;
+                else status = `${teamName(sg.leader)} ${sg.lead} up, ${sg.left} to play`;
+                return `<div class="flex items-center justify-between py-2 border-t border-slate-100">
+                    <div class="font-black text-slate-700">${label} <span class="text-xs font-bold text-slate-400">$${sg.bet}</span></div>
+                    <div class="font-bold text-slate-700 text-right">${status}</div></div>`;
+            };
+            el.innerHTML = `<div class="bg-white p-5 rounded-3xl shadow border border-slate-200">
+                <div class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Nassau</div>
+                ${line('Front', res.segs.front)}${line('Back', res.segs.back)}${line('Total', res.segs.overall)}
+                <div class="text-[11px] font-bold text-slate-400 mt-2">Money moves to Standings once a bet is won or halved.</div></div>`;
+        }
+
+        /* ---------- STROKE PLAY (net leaderboard) ---------- */
+        function renderStrokeCard(rId) {
+            const el = document.getElementById('stroke-' + rId);
+            if (!el) return;
+            const r = getRound(rId);
+            const rows = state.players.map((p, i) => {
+                let gross = 0, net = 0, parSum = 0, thru = 0;
+                for (let h = 1; h <= 18; h++) {
+                    const g = r.scores[`h${h}_p${i}`] || 0;
+                    if (g) { gross += g; net += g - getStrokes(p.hdcp, h); parSum += pars[h-1]; thru++; }
+                }
+                return { i, gross, net, toPar: net - parSum, thru };
+            }).filter(x => x.thru > 0).sort((a, b) => a.toPar - b.toPar || a.net - b.net);
+            const tp = v => v === 0 ? 'E' : (v > 0 ? '+' + v : '' + v);
+            el.innerHTML = `<div class="bg-white p-5 rounded-3xl shadow border border-slate-200">
+                <div class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Stroke play, net</div>
+                ${rows.length ? `
+                <div class="grid grid-cols-5 text-[10px] font-black uppercase text-slate-400 pb-1"><div class="col-span-2">Player</div><div>Thru</div><div>Gross</div><div>Net</div></div>
+                ${rows.map((x, k) => `
+                    <div class="grid grid-cols-5 items-center py-2 border-t border-slate-100">
+                        <div class="col-span-2 font-black text-slate-700 truncate">${k+1}. ${esc(pName(x.i))}</div>
+                        <div class="font-bold text-slate-500">${x.thru === 18 ? 'F' : x.thru}</div>
+                        <div class="font-bold text-slate-500">${x.gross}</div>
+                        <div class="font-black" style="color:${x.toPar < 0 ? '#ef4444' : '#1e293b'}">${x.net} <span class="text-xs">(${tp(x.toPar)})</span></div>
+                    </div>`).join('')}` : `<div class="text-sm font-bold text-slate-400">Enter scores to see the net leaderboard.</div>`}
+            </div>`;
         }
 
         function renderStandings() {
             let cash = Array(state.players.length).fill(0);
             state.rounds.forEach(r => {
-                if(r.game === 'nassau') {
-                    let rF=0, bF=0, rB=0, bB=0;
-                    for(let h=1; h<=18; h++) {
-                        const net = (c) => Math.min(...state.players.map((p,i)=>(p.team===c&&r.scores[`h${h}_p${i}`])?r.scores[`h${h}_p${i}`]-getStrokes(p.hdcp,h):999));
-                        let nr=net('red'), nb=net('blue');
-                        if(nr<900 && nb<900) { if (nr < nb) { if(h<=9) rF++; else rB++; } else if (nb < nr) { if(h<=9) bF++; else bB++; } }
-                    }
-                    let rw=0;
-                    if(rF > bF) rw += r.bets[0]; else if(bF > rF) rw -= r.bets[0];
-                    if(rB > bB) rw += r.bets[1]; else if(bB > rB) rw -= r.bets[1];
-                    if((rF + rB) > (bF + bB)) rw += r.bets[2]; else if((bF + bB) > (rF + rB)) rw -= r.bets[2];
-                    state.players.forEach((p,i)=>{ if(p.team==='red') cash[i]+=rw; if(p.team==='blue') cash[i]-=rw; });
+                if(gameOn(r, 'nassau')) {
+                    const n = computeNassau(r);
+                    n.money.forEach((v, i) => cash[i] += v);
+                }
+                if(gameOn(r, 'banker')) {
+                    const res = computeBanker(r);
+                    res.totals.forEach((v, i) => cash[i] += v);
                 }
             });
-            document.getElementById('standings-body').innerHTML = state.players.map((p,i)=>`
-                <tr class="border-b"><td class="p-8 text-left font-black text-slate-700 text-xl team-border-${p.team}">${p.name||`Player ${i+1}`}</td>
-                <td class="font-black text-3xl ${cash[i]>=0?'text-emerald-600':'text-red-500'}">${cash[i]!==0?(cash[i]>0?'+$'+cash[i]:'-$'+Math.abs(cash[i])):'-'}</td></tr>
-            `).join('');
+            document.getElementById('standings-body').innerHTML = state.players.map((p,i)=>{
+                const c = Math.round(cash[i]*100)/100;
+                return `
+                <tr class="border-b"><td class="p-8 text-left font-black text-slate-700 text-xl team-border-${p.team}">${esc(p.name)||`Player ${i+1}`}</td>
+                <td class="font-black text-3xl ${c>=0?'text-emerald-600':'text-red-500'}">${c!==0?(c>0?'+$'+c:'-$'+Math.abs(c)):'-'}</td></tr>`;
+            }).join('');
         }
 
-        function updateRoundGame(id, val) { state.rounds.find(x=>x.id===id).game=val; save(); renderAllRounds(); showTab('r'+id); }
-        function updateRoundBet(id, idx, val) { state.rounds.find(x=>x.id===id).bets[idx]=parseInt(val)||0; save(); renderStandings(); }
+        function toggleGame(id, g) { const r = getRound(id); r.games[g] = !r.games[g]; save(); renderAllRounds(); renderStandings(); showTab('r'+id); }
+        function updateRoundBet(id, idx, val) { state.rounds.find(x=>x.id===id).bets[idx]=parseFloat(val)||0; save(); renderStandings(); if (gameOn(getRound(id),'nassau')) renderNassauCard(id); }
         function getStrokes(hdcp, hIdx) { let s=0; let t=hdcp; while(t>0){if(t>=holeIndices[hIdx-1])s++; t-=18;} return s; }
         function resetData() { if(confirm("Wipe everything?")) { localStorage.removeItem('golfTripV9'); location.reload(); } }
+
+        /* =========================================================
+           BANKER GAME
+           Rules:
+           - Banker sets a max; each other player bets up to it (separate match vs banker).
+           - Player can double own match while tee shot is in the air (triple on par 3).
+           - Banker's double/triple applies to every match.
+           - Low NET wins each match; tied net = push.
+           - Winner's GROSS birdie doubles winnings (triple on par 3),
+             gross eagle triples, ace on a par 3 quadruples.
+           - Low net on a hole banks the next hole (tie -> longest hole-out, picked in pop-up).
+           - Holes 17 & 18: player down the most banks (tie -> coin flip, picked in pop-up).
+           - Any auto pick can be overridden in the Banker row (to defer).
+        ========================================================= */
+
+        function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        function getRound(id) { return state.rounds.find(x => x.id === id); }
+        function pName(i) { const p = state.players[i]; return (p && p.name) ? p.name : `Player ${i+1}`; }
+        function shortName(i) { const n = pName(i); return n.length > 7 ? n.slice(0, 6) + '…' : n; }
+        function joinNames(list) { const n = list.map(pName); return n.length <= 2 ? n.join(' and ') : n.slice(0,-1).join(', ') + ' and ' + n[n.length-1]; }
+        function round2(v) { return Math.round(v * 100) / 100; }
+        function money(v) { v = round2(v); if (v === 0) return 'E'; return (v > 0 ? '+$' : '−$') + Math.abs(v); }
+        function moneyColor(v) { v = round2(v); return v > 0 ? '#059669' : (v < 0 ? '#ef4444' : '#94a3b8'); }
+
+        function grossOf(r, h, i) { return r.scores[`h${h}_p${i}`] || 0; }
+        function holeComplete(r, h) { return state.players.length > 0 && state.players.every((p, i) => grossOf(r, h, i) > 0); }
+        function shotMult(h) { return pars[h-1] === 3 ? 3 : 2; }
+        function bonusMult(par, g) {
+            if (par === 3 && g === 1) return 4;           // ace on a par 3
+            const d = par - g;
+            if (d >= 2) return 3;                         // eagle (or better)
+            if (d === 1) return par === 3 ? 3 : 2;        // birdie
+            return 1;
+        }
+        function bonusName(par, g) {
+            if (par === 3 && g === 1) return 'ace';
+            const d = par - g;
+            if (d >= 3) return 'albatross';
+            if (d === 2) return 'eagle';
+            if (d === 1) return 'birdie';
+            return '';
+        }
+
+        function bkHoleRO(r, h) { return (r.bk && r.bk.holes && r.bk.holes[h]) || {}; }
+        function bkHole(r, h) {
+            if (!r.bk) r.bk = { holes: {} };
+            if (!r.bk.holes[h]) r.bk.holes[h] = { banker: null, max: 0, bets: {}, dbl: {}, bankerDbl: false };
+            const hd = r.bk.holes[h];
+            hd.bets = hd.bets || {}; hd.dbl = hd.dbl || {};
+            return hd;
+        }
+
+        function computeBanker(r) {
+            const n = state.players.length;
+            const res = {
+                bankers: [], explicit: [], tie: [], deltas: [], matches: [], running: [], involved: [],
+                totals: Array(n).fill(0),
+                ledger: Array.from({ length: n }, () => Array(n).fill(0))   // ledger[a][b] = what a owes b
+            };
+            const running = Array(n).fill(0);
+
+            for (let h = 1; h <= 18; h++) {
+                const hd = bkHoleRO(r, h);
+
+                // Suggested banker for this hole
+                let sug = null, tie = null;
+                if (h > 1 && holeComplete(r, h - 1)) {
+                    const low = Math.min(...running);
+                    if (h >= 17 && low < 0) {
+                        const cands = running.map((v, i) => round2(v) === round2(low) ? i : -1).filter(i => i >= 0);
+                        if (cands.length === 1) sug = cands[0];
+                        else tie = { kind: 'down', low, cands, key: `d:${round2(low)}:${cands.join(',')}` };
+                    } else {
+                        const nets = state.players.map((p, i) => grossOf(r, h - 1, i) - getStrokes(p.hdcp, h - 1));
+                        const lowNet = Math.min(...nets);
+                        const cands = nets.map((v, i) => v === lowNet ? i : -1).filter(i => i >= 0);
+                        if (cands.length === 1) sug = cands[0];
+                        else tie = { kind: 'score', low: lowNet, cands, key: `s:${h-1}:${lowNet}:${cands.join(',')}` };
+                    }
+                    if (tie) {
+                        tie.resolved = hd.pick != null && hd.pickKey === tie.key && tie.cands.includes(hd.pick);
+                        if (tie.resolved) sug = hd.pick;
+                    }
+                }
+
+                const explicit = (hd.banker != null && hd.banker < n) ? hd.banker : null;
+                const bk = explicit != null ? explicit : sug;
+                res.bankers[h] = bk; res.explicit[h] = explicit; res.tie[h] = tie;
+
+                // Matches for this hole
+                const deltas = Array(n).fill(0), involved = Array(n).fill(false), ms = [];
+                if (bk != null) {
+                    const m = shotMult(h);
+                    const bets = hd.bets || {}, dbl = hd.dbl || {};
+                    state.players.forEach((p, i) => {
+                        if (i === bk) return;
+                        const bet = parseFloat(bets[i]) || 0;
+                        if (bet <= 0) return;
+                        const stake = bet * (dbl[i] ? m : 1) * (hd.bankerDbl ? m : 1);
+                        const mt = { p: i, bet, stake, done: false };
+                        const gB = grossOf(r, h, bk), gP = grossOf(r, h, i);
+                        if (gB && gP) {
+                            const nB = gB - getStrokes(state.players[bk].hdcp, h);
+                            const nP = gP - getStrokes(p.hdcp, h);
+                            Object.assign(mt, { done: true, nB, nP, gB, gP });
+                            involved[i] = true; involved[bk] = true;
+                            if (nB === nP) { mt.winner = null; mt.amt = 0; }
+                            else {
+                                const w = nB < nP ? bk : i, l = w === bk ? i : bk;
+                                const gW = grossOf(r, h, w);
+                                mt.winner = w; mt.bonus = bonusMult(pars[h-1], gW); mt.bonusName = bonusName(pars[h-1], gW);
+                                mt.amt = stake * mt.bonus;
+                                deltas[w] += mt.amt; deltas[l] -= mt.amt;
+                                res.ledger[l][w] += mt.amt;
+                            }
+                        }
+                        ms.push(mt);
+                    });
+                }
+                deltas.forEach((d, i) => running[i] += d);
+                res.deltas[h] = deltas; res.involved[h] = involved; res.matches[h] = ms; res.running[h] = running.slice();
+            }
+            res.totals = running.slice();
+            return res;
+        }
+
+        function refreshBanker(rId) { updateBanker(rId); renderStandings(); }
+
+        function updateBanker(rId) {
+            const r = getRound(rId);
+            if (!r || !gameOn(r, 'banker')) return;
+            const bRow = document.getElementById(`row-bk-banker-${rId}`);
+            const eRow = document.getElementById(`row-bk-bets-${rId}`);
+            if (!bRow || !eRow) return;
+            const res = computeBanker(r);
+
+            let bh = `<td class="sticky-col text-left px-3 uppercase text-xs font-black text-amber-600">Banker</td>`;
+            let eh = `<td class="sticky-col text-left px-3 uppercase text-xs font-black text-slate-500">Bets</td>`;
+
+            for (let h = 1; h <= 18; h++) {
+                const hd = bkHoleRO(r, h);
+                const bk = res.bankers[h], t = res.tie[h];
+
+                if (bk == null && t && !t.resolved && hd.banker == null) {
+                    bh += `<td class="bk-cell bg-amber-50"><button onclick="openTieModal(${rId},${h})" class="w-full h-full font-black text-amber-600">
+                              <div class="text-[12px]">TIE</div><div class="text-[9px]">tap to pick</div></button></td>`;
+                } else {
+                    const label = bk == null
+                        ? `<span class="text-[11px] font-black text-amber-500 uppercase">Pick</span>`
+                        : `<div class="text-[12px] font-black text-slate-800 leading-tight">${esc(shortName(bk))}</div>
+                           <div class="text-[9px] font-bold ${hd.banker != null ? 'text-emerald-600' : 'text-slate-400'}">${hd.banker != null ? 'picked' : 'auto'}</div>`;
+                    const opts = `<option value="">${(bk != null && hd.banker == null) ? 'Auto: ' + esc(pName(bk)) : 'Auto'}</option>` +
+                        state.players.map((p, i) => `<option value="${i}" ${hd.banker === i ? 'selected' : ''}>${esc(pName(i))}</option>`).join('');
+                    bh += `<td class="bk-cell ${bk != null ? 'bk-banker-hole' : ''}">${label}<select class="bk-select" onchange="bkSetBanker(${rId},${h},this.value)">${opts}</select></td>`;
+                }
+
+                const bets = hd.bets || {};
+                const nIn = state.players.filter((p, i) => i !== bk && (parseFloat(bets[i]) || 0) > 0).length;
+                const eLabel = bk == null
+                    ? `<span class="text-slate-300 text-[11px] font-black uppercase">Set</span>`
+                    : `<div class="text-[12px] font-black text-slate-700">${hd.max ? '$' + hd.max : 'Bets'}</div>
+                       <div class="text-[9px] font-bold text-slate-400">${nIn} in${hd.bankerDbl ? ` <span class="text-amber-600">BK×${shotMult(h)}</span>` : ''}</div>`;
+                eh += `<td class="bk-cell"><button onclick="openHoleSheet(${rId},${h})" class="w-full h-full">${eLabel}</button></td>`;
+
+                if (h === 9) { bh += `<td class="subtotal-col"></td>`; eh += `<td class="subtotal-col"></td>`; }
+            }
+            bRow.innerHTML = bh + `<td class="subtotal-col"></td><td class="total-final-col"></td>`;
+            eRow.innerHTML = eh + `<td class="subtotal-col"></td><td class="total-final-col"></td>`;
+
+            // Money rows
+            state.players.forEach((p, i) => {
+                const row = document.getElementById(`row-bk-m-${rId}-${i}`);
+                if (!row) return;
+                let html = `<td class="sticky-col text-left px-3 team-border-${p.team}">
+                              <div class="text-[9px] font-black uppercase text-slate-400">Money</div>
+                              <div class="text-sm font-black text-slate-700 truncate">${esc(pName(i))}</div></td>`;
+                let out = 0, inn = 0;
+                for (let h = 1; h <= 18; h++) {
+                    const d = res.deltas[h][i];
+                    if (h <= 9) out += d; else inn += d;
+                    const isBk = res.bankers[h] === i;
+                    const show = res.involved[h][i];
+                    html += `<td class="${isBk ? 'bk-banker-hole' : ''}">${show ? `
+                        <div class="text-[15px] font-black" style="color:${moneyColor(d)}">${money(d)}</div>
+                        <div class="text-[10px] font-bold text-slate-400">${money(res.running[h][i])}</div>` : ''}</td>`;
+                    if (h === 9) html += `<td class="subtotal-col" style="color:${moneyColor(out)}">${round2(out) ? money(out) : ''}</td>`;
+                }
+                const tot = out + inn;
+                html += `<td class="subtotal-col" style="color:${moneyColor(inn)}">${round2(inn) ? money(inn) : ''}</td>
+                         <td class="total-final-col" style="color:${moneyColor(tot)}">${money(tot)}</td>`;
+                row.innerHTML = html;
+            });
+
+            renderSettle(rId, res);
+        }
+
+        function renderSettle(rId, res) {
+            const el = document.getElementById(`settle-${rId}`);
+            if (!el) return;
+            const n = state.players.length;
+            const lines = [];
+            for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) {
+                const d = round2(res.ledger[a][b] - res.ledger[b][a]);
+                if (d > 0) lines.push({ from: a, to: b, amt: d });
+                if (d < 0) lines.push({ from: b, to: a, amt: -d });
+            }
+            lines.sort((x, y) => y.amt - x.amt);
+            el.innerHTML = `
+                <div class="bg-white p-5 rounded-3xl shadow border border-slate-200">
+                    <div class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-3">Banker settle up</div>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        ${state.players.map((p, i) => `
+                            <div class="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200">
+                                <div class="text-[10px] font-black text-slate-500 truncate max-w-[110px]">${esc(pName(i))}</div>
+                                <div class="text-lg font-black" style="color:${moneyColor(res.totals[i])}">${money(res.totals[i])}</div>
+                            </div>`).join('')}
+                    </div>
+                    ${lines.length ? lines.map(l => `
+                        <div class="flex items-center justify-between py-2 border-t border-slate-100">
+                            <div class="font-bold text-slate-700"><span class="font-black">${esc(pName(l.from))}</span> pays <span class="font-black">${esc(pName(l.to))}</span></div>
+                            <div class="font-black text-slate-900">$${l.amt}</div>
+                        </div>`).join('')
+                    : `<div class="text-sm font-bold text-slate-400">No money has changed hands yet. Payouts show here as holes finish.</div>`}
+                </div>`;
+        }
+
+        /* ---------- Banker edits ---------- */
+        function bkSetBanker(rId, h, val) {
+            const hd = bkHole(getRound(rId), h);
+            hd.banker = val === '' ? null : parseInt(val);
+            save(); refreshBanker(rId);
+            if (sheetCtx) renderHoleSheet();
+        }
+        function bkSetMax(rId, h, val) {
+            bkHole(getRound(rId), h).max = parseFloat(val) || 0;
+            save(); refreshBanker(rId); updateSheetLines();
+        }
+        function bkSetBet(rId, h, p, val) {
+            bkHole(getRound(rId), h).bets[p] = parseFloat(val) || 0;
+            save(); refreshBanker(rId); updateSheetLines();
+        }
+        function bkBetMax(rId, h, p) {
+            const hd = bkHole(getRound(rId), h);
+            hd.bets[p] = hd.max || 0;
+            save(); refreshBanker(rId); renderHoleSheet();
+        }
+        function bkToggleDbl(rId, h, p) {
+            const hd = bkHole(getRound(rId), h);
+            hd.dbl[p] = !hd.dbl[p];
+            save(); refreshBanker(rId); renderHoleSheet();
+        }
+        function bkToggleBankerDbl(rId, h) {
+            const hd = bkHole(getRound(rId), h);
+            hd.bankerDbl = !hd.bankerDbl;
+            save(); refreshBanker(rId); renderHoleSheet();
+        }
+
+        /* ---------- Modal ---------- */
+        let sheetCtx = null;
+        function showModal() { const m = document.getElementById('modal'); m.classList.remove('hidden'); m.classList.add('flex'); }
+        function closeModal() { const m = document.getElementById('modal'); m.classList.add('hidden'); m.classList.remove('flex'); sheetCtx = null; }
+        function modalOpen() { return !document.getElementById('modal').classList.contains('hidden'); }
+
+        function openHoleSheet(rId, h) { sheetCtx = { rId, h }; renderHoleSheet(); showModal(); }
+
+        function sheetLine(res, h, i, hd) {
+            const bk = res.bankers[h];
+            const mt = (res.matches[h] || []).find(x => x.p === i);
+            if (!mt) return `<span class="text-slate-400">Not in a match this hole</span>`;
+            const m = shotMult(h);
+            let chain = `$${mt.bet}`;
+            if (hd.dbl && hd.dbl[i]) chain += ` → $${mt.bet * m}`;
+            if (hd.bankerDbl) chain += ` → $${mt.stake}`;
+            const over = hd.max && mt.bet > hd.max ? ` <span class="text-red-500">Over the $${hd.max} max</span>` : '';
+            let result;
+            if (!mt.done) result = `<span class="text-slate-400">Waiting on scores</span>`;
+            else if (mt.winner == null) result = `<span class="text-slate-500">Push, both net ${mt.nP}</span>`;
+            else {
+                const bonus = mt.bonus > 1 ? ` (${mt.bonusName} ×${mt.bonus})` : '';
+                result = mt.winner === i
+                    ? `<span style="color:#059669">Wins $${round2(mt.amt)}${bonus}</span>`
+                    : `<span style="color:#ef4444">Pays ${esc(pName(bk))} $${round2(mt.amt)}${bonus}</span>`;
+            }
+            return `Stake ${chain}${over}. ${result}`;
+        }
+
+        function renderHoleSheet() {
+            if (!sheetCtx) return;
+            const { rId, h } = sheetCtx;
+            const r = getRound(rId);
+            const hd = bkHole(r, h);
+            const res = computeBanker(r);
+            const bk = res.bankers[h];
+            const m = shotMult(h);
+            const word = m === 3 ? 'Triple' : 'Double';
+
+            const opts = `<option value="">${(bk != null && hd.banker == null) ? 'Auto: ' + esc(pName(bk)) : 'Auto'}</option>` +
+                state.players.map((p, i) => `<option value="${i}" ${hd.banker === i ? 'selected' : ''}>${esc(pName(i))}</option>`).join('');
+
+            let html = `
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <div class="text-2xl font-black text-slate-900">Hole ${h}</div>
+                        <div class="text-xs font-bold text-slate-400">Par ${pars[h-1]}${m === 3 ? ', so doubles are triples' : ''}</div>
+                    </div>
+                    <button onclick="closeModal()" class="px-5 py-3 bg-emerald-500 text-white font-black rounded-xl text-sm uppercase">Done</button>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <label class="block text-left">
+                        <span class="text-[10px] font-black uppercase text-slate-400">Banker</span>
+                        <select onchange="bkSetBanker(${rId},${h},this.value)" class="w-full mt-1 p-3 bg-slate-50 border rounded-xl font-bold" style="font-size:16px">${opts}</select>
+                    </label>
+                    <label class="block text-left">
+                        <span class="text-[10px] font-black uppercase text-slate-400">Max bet ($)</span>
+                        <input type="number" inputmode="decimal" value="${hd.max || ''}" placeholder="0" oninput="bkSetMax(${rId},${h},this.value)" class="sheet-input mt-1 p-3 bg-slate-50 border rounded-xl font-black">
+                    </label>
+                </div>`;
+
+            if (bk == null) {
+                html += `<div class="p-4 bg-amber-50 text-amber-700 font-bold rounded-xl text-sm">Pick a banker to set up this hole's matches.</div>`;
+            } else {
+                html += `<button onclick="bkToggleBankerDbl(${rId},${h})" class="w-full mb-3 py-3 rounded-xl font-black text-sm uppercase ${hd.bankerDbl ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-500'}">
+                            ${hd.bankerDbl ? `✓ ${esc(pName(bk))} ${word.toLowerCase()}d every match` : `${esc(pName(bk))} ${word.toLowerCase()}s every match`}
+                         </button>`;
+                state.players.forEach((p, i) => {
+                    if (i === bk) return;
+                    const on = !!hd.dbl[i];
+                    html += `
+                    <div class="py-3 border-t border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <div class="flex-1 font-black text-slate-800 truncate text-left">${esc(pName(i))}</div>
+                            <div class="relative w-20">
+                                <span class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                                <input type="number" inputmode="decimal" value="${hd.bets[i] || ''}" placeholder="0" oninput="bkSetBet(${rId},${h},${i},this.value)" class="sheet-input pl-5 py-2 bg-slate-50 border rounded-lg font-black">
+                            </div>
+                            <button onclick="bkBetMax(${rId},${h},${i})" class="px-2 py-2 text-[10px] font-black uppercase bg-slate-100 text-slate-500 rounded-lg">Max</button>
+                            <button onclick="bkToggleDbl(${rId},${h},${i})" class="px-3 py-2 text-[11px] font-black uppercase rounded-lg ${on ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'}">${on ? '✓ ' : ''}${word}</button>
+                        </div>
+                        <div id="sheet-line-${i}" class="mt-1 text-xs font-bold text-slate-500 text-left">${sheetLine(res, h, i, hd)}</div>
+                    </div>`;
+                });
+            }
+            document.getElementById('modal-body').innerHTML = html;
+        }
+
+        function updateSheetLines() {
+            if (!sheetCtx) return;
+            const { rId, h } = sheetCtx;
+            const r = getRound(rId);
+            const res = computeBanker(r);
+            const hd = bkHole(r, h);
+            state.players.forEach((p, i) => {
+                const el = document.getElementById(`sheet-line-${i}`);
+                if (el) el.innerHTML = sheetLine(res, h, i, hd);
+            });
+        }
+
+        /* ---------- Tie-breaker pop-up ---------- */
+        let tieTimer = null;
+        function scheduleTieCheck(rId) { clearTimeout(tieTimer); tieTimer = setTimeout(() => checkTies(rId), 900); }
+
+        function checkTies(rId) {
+            if (modalOpen()) return;
+            const r = getRound(rId);
+            if (!r || !gameOn(r, 'banker')) return;
+            const res = computeBanker(r);
+            for (let h = 2; h <= 18; h++) {
+                const t = res.tie[h];
+                if (!t || t.resolved) continue;
+                const hd = bkHoleRO(r, h);
+                if (hd.banker != null || hd.promptKey === t.key) continue;
+                bkHole(r, h).promptKey = t.key; save();
+                openTieModal(rId, h);
+                return;
+            }
+        }
+
+        function openTieModal(rId, h) {
+            const r = getRound(rId);
+            const res = computeBanker(r);
+            const t = res.tie[h];
+            if (!t) return;
+            sheetCtx = null;
+            const msg = t.kind === 'score'
+                ? `${esc(joinNames(t.cands))} tied hole ${h-1} at net ${t.low}. Who holed out from farther away? They bank hole ${h}.`
+                : `${esc(joinNames(t.cands))} are tied for down the most at ${money(t.low)}. Flip a coin. The winner banks hole ${h}.`;
+            const others = state.players.map((p, i) => `<option value="${i}">${esc(pName(i))}</option>`).join('');
+            document.getElementById('modal-body').innerHTML = `
+                <div class="text-2xl font-black text-slate-900 mb-1">${t.kind === 'score' ? 'Tie for banker' : 'Coin flip for banker'}</div>
+                <div class="text-sm font-bold text-slate-500 mb-5">${msg}</div>
+                <div class="space-y-3">
+                    ${t.cands.map(i => `<button onclick="bkPickTie(${rId},${h},${i},'${t.key}')" class="w-full py-4 bg-slate-900 text-white font-black rounded-xl text-lg">${esc(pName(i))}</button>`).join('')}
+                </div>
+                <label class="block mt-5 text-left">
+                    <span class="text-[10px] font-black uppercase text-slate-400">Or someone else banks (deferred)</span>
+                    <select onchange="if(this.value!==''){ bkSetBanker(${rId},${h},this.value); closeModal(); }" class="w-full mt-1 p-3 bg-slate-50 border rounded-xl font-bold" style="font-size:16px">
+                        <option value="">Choose a player</option>${others}
+                    </select>
+                </label>
+                <button onclick="closeModal()" class="block mx-auto mt-5 text-xs font-bold text-slate-400 underline">Decide later</button>`;
+            showModal();
+        }
+
+        function bkPickTie(rId, h, idx, key) {
+            const hd = bkHole(getRound(rId), h);
+            hd.pick = idx; hd.pickKey = key; hd.promptKey = key;
+            save(); closeModal(); refreshBanker(rId);
+        }
 
         init();
     </script>
